@@ -1,0 +1,34 @@
+//Chux
+#ifndef Encoder_h
+#define Encoder_h
+
+#include "Arduino.h"
+#include "Subject.h"
+//#define DEBUG_HW
+#define DEBUG
+
+class Encoder : public Subject<Encoder>
+{
+  public:
+    enum e_directionState
+    {
+      UNDEF,
+      IDLE,
+      FORWARD,
+      BACKWARD
+    };
+    Encoder(int triggerPin, int directionPin);
+    int m_triggerPin;
+    int m_directionPin;
+    e_directionState directionState;
+    void read();
+    void pause();
+    void unpause();
+    void tick();
+  private:
+    bool m_paused;
+    long m_delayTime;
+    static const int READ_DELAY = 1;
+};
+
+#endif
