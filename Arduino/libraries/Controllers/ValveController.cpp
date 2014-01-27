@@ -44,7 +44,7 @@ void ValveController::forceSwapValveState()
 
 void ValveController::swapValveState(bool force)
 {
-  switch (m_valveState)
+  switch(m_valveState)
   {
     case OPEN:
       changeValveState(force, CLOSED);
@@ -103,7 +103,7 @@ void ValveController::changeValveState(bool ignoreDelay, e_valveState state)
   }  
   m_valveState = state;
   resetDelay();
-  switch (state)
+  switch(state)
   {
     case OPEN:
       digitalWrite(m_valveSignalPin, HIGH);

@@ -5,13 +5,15 @@ TempValveManager::TempValveManager(TempProbe *tempProbe, ValveController *valveC
     m_pTempProbe(tempProbe), m_pValveController(valveController), 
     Observer<TempProbe>()
 {
-  m_upperThreshold = -3.0;
-  m_lowerThreshold = -8.0;
+  m_upperThreshold = 999.0;
+  m_lowerThreshold = 0.0;
+  
   m_thresholdRegion = UNDEF;
   m_hasDoneUpperBoundsTask = false;
 }
 TempValveManager::~TempValveManager()
 {
+  unregisterObservers();
 }
 
 void TempValveManager::registerObservers()
@@ -37,7 +39,7 @@ void TempValveManager::update(TempProbe *tempProbe)
   }
 }
 
-void TempValveManager::updateThreshold(double temp, double boundsThreshold)
+void TempValveManager::updateThreshold(float temp, float boundsThreshold)
 {
   if (temp >= (m_upperThreshold + boundsThreshold) && m_thresholdRegion != OVER) {
     m_thresholdRegion = OVER;
@@ -111,6 +113,8 @@ void TempValveManager::doUpperBoundsTask()
 {
   #ifdef DEBUG_BOUNDS
     Serial.println(F("TVM: UPPER BOUNDS"));
+    Serial.println(m_upperThreshold);
+    Serial.println(F("TVM: UPPDDR BOUNDS"));
   #endif
   m_pValveController->openValve();
 }
@@ -121,4 +125,24 @@ void TempValveManager::doLowerBoundsTask()
     Serial.println(F("TVM: LOWER BOUNDS"));
   #endif
   m_pValveController->closeValve();
+}
+
+void TempValveManager::setUpperThreshold(float upperThreshold)
+{
+  m_upperThreshold = upperThreshold;
+}
+
+void TempValveManager::setLowerThreshold(float lowerThreshold)
+{
+  m_lowerThreshold = lowerThreshold;
+}
+
+float TempValveManager::getUpperThreshold()
+{
+  return m_upperThreshold;
+}
+
+float TempValveManager::getLowerThreshold()
+{
+  return m_lowerThreshold;
 }

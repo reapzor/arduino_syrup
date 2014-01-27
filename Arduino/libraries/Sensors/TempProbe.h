@@ -23,8 +23,8 @@ class TempProbe : public Subject<TempProbe>
       SCALE,
       TEMP
     };
-    double m_tempF;
-    double m_tempC;
+    float m_tempF;
+    float m_tempC;
     int m_tempProbeReading;
     int m_tempProbePin;
     int m_digitalMappedTempProbePin;
@@ -38,9 +38,9 @@ class TempProbe : public Subject<TempProbe>
     void pause();
     void unpause();
     void tick();
-    double convertReadingToF(int tempProbeReading);
-    double convertReadingToF(double tempC);
-    double convertReadingToC(int tempProbeReading);
+    float convertReadingToF(int tempProbeReading);
+    float convertReadingToF(float tempC);
+    float convertReadingToC(int tempProbeReading);
     
   private:
     e_scale m_activeScale;

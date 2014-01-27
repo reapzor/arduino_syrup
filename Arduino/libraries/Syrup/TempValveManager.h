@@ -30,11 +30,13 @@ class TempValveManager : public Observer<TempProbe>
     ~TempValveManager();
     e_thresholdRegion m_thresholdRegion;
     static const int BOUNDS_THRESHOLD_F = 1;
-    static const float BOUNDS_THRESHOLD_C = 0.5;
-    void setUpperThreshold();
-    void setLowerThreshold();
-    double getUpperThreshold();
-    double getLowerThreshold();
+    static const float BOUNDS_THRESHOLD_C = 0.555;
+    //In anticipation of this becoming an observable, 
+    //  use sets instead of direct access
+    void setUpperThreshold(float upperThreshold);
+    void setLowerThreshold(float lowerThreshold);
+    float getUpperThreshold();
+    float getLowerThreshold();
     
     void update(TempProbe *tempProbe);
     
@@ -42,11 +44,11 @@ class TempValveManager : public Observer<TempProbe>
     void unregisterObservers();
     
   private:
-    double m_upperThreshold;
-    double m_lowerThreshold;
+    float m_upperThreshold;
+    float m_lowerThreshold;
     TempProbe *m_pTempProbe;
     ValveController *m_pValveController;
-    void updateThreshold(double temp, double boundsThreshold);
+    void updateThreshold(float temp, float boundsThreshold);
     bool m_hasDoneUpperBoundsTask;
     void tryUpperBoundsTask();
     void tryLowerBoundsTask();

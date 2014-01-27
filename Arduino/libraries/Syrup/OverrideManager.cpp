@@ -10,6 +10,7 @@ OverrideManager::OverrideManager(Button *toggleButton, Button *overrideSwitch,
 }
 OverrideManager::~OverrideManager()
 {
+  unregisterObservers();
 }
 
 OverrideManager::ToggleButtonObserver::ToggleButtonObserver(

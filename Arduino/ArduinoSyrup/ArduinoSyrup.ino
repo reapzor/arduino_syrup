@@ -11,21 +11,25 @@
 #include <MemoryFree.h>
 #include <StandardCplusplus.h>
 #include <LiquidCrystal.h>
+#include <EEPROMex.h>
 
 #include <Observer.h>
 #include <Subject.h>
 #include <Command.h>
 #include <AnalogHelper.h>
 
+
 #include <Encoder.h>
 #include <Button.h>
 #include <ValveController.h>
 #include <TempProbe.h>
 #include <LCDController.h>
+#include <SyrupSettingsManager.h>
 #include "Stats.h"
 #include "SyrupDisplayManager.h"
 #include "OverrideManager.h"
 #include "TempValveManager.h"
+
 
 /*
 class Helpers {
@@ -57,6 +61,7 @@ int Helpers::charSpacing(int integer) {
  Stats stats(&valveController, &tempProbe);
  OverrideManager overrideManager(&toggleButton, &overrideSwitch, &valveController);
  TempValveManager tempValveManager(&tempProbe, &valveController);
+ SyrupSettingsManager settingsManager;
  SyrupDisplayManager displayManager(&lcd, &tempProbe, &valveController, &stats);
 
  
@@ -73,8 +78,9 @@ int Helpers::charSpacing(int integer) {
 //  char *lines = "line hereline herelffffg";
 //  lines[1] = "line hereline herelffff\0";
 //stats.registerObservers();
-  lcd.test();
-//  lcd.write(1, "FUCK");
+EEPROM.readInt(1);
+lcd.test();
+
 //  delay(1300);
 //  lcd.edit(1, 2, "N!");
 //delay(1300);
@@ -127,9 +133,15 @@ temp->temperatureChanged();
    Serial.println(freeMemory());
 //temp->temperatureChanged();   
 */
+
+//settingsManager.save(settingsManager.m_settings);
+EEPROM.writeByte(168, 0xFF);
+EEPROM.writeByte(169, 0xFF);
+settingsManager.prime();
+
+//displayManager.setState(SyrupDisplayManager::WELCOME);
 Serial.println("lol");
-displayManager.setState(SyrupDisplayManager::WELCOME);
-delay(500);
+delay(1000);
 
  } 
 

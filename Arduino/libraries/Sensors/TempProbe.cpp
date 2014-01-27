@@ -9,7 +9,7 @@ TempProbe::TempProbe(int tempProbePin)
   m_tempProbePin = tempProbePin;
   m_digitalMappedTempProbePin = getDigitalAnalogPin(tempProbePin);
   digitalWrite(m_digitalMappedTempProbePin, LOW);
-  m_activeScale = CELCIUS;
+  m_activeScale = FAHRENHEIT;
   m_paused = false;
   m_readCount = 0;
   m_candidateTempProbeReading = 0;
@@ -94,20 +94,20 @@ TempProbe::e_scale TempProbe::getScale()
   return m_activeScale;
 }
 
-double TempProbe::convertReadingToC(int tempProbeReading)
+float TempProbe::convertReadingToC(int tempProbeReading)
 {
-  double sensorReadingMiliVolts = (double)tempProbeReading;
+  float sensorReadingMiliVolts = (float)tempProbeReading;
   sensorReadingMiliVolts *= .0048;
   sensorReadingMiliVolts *= 1000;
   return (0.0512 * sensorReadingMiliVolts) - 20.5128;
 }
 
-double TempProbe::convertReadingToF(double tempC)
+float TempProbe::convertReadingToF(float tempC)
 {
   return ((tempC * 9) / 5) + 32;     
 }
 
-double TempProbe::convertReadingToF(int tempProbeReading)
+float TempProbe::convertReadingToF(int tempProbeReading)
 {
   return convertReadingToF(convertReadingToC(tempProbeReading));
 }
