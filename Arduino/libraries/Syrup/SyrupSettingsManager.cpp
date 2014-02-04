@@ -1,4 +1,5 @@
 //Chux
+//Note: For v2, make this only dirty sections that are dirty instead of all 3 and copy cause thats just naughty, also write one extra for the hell of it when saving even though we only need to verify 3 successes to pass.
 #include "SyrupSettingsManager.h"
 
 SyrupSettingsManager::SyrupSettingsManager()
@@ -17,6 +18,7 @@ SyrupSettingsManager::~SyrupSettingsManager()
 void SyrupSettingsManager::save(SyrupSettings &syrupSettings)
 {
   if (m_isUseless) {
+    m_settings = syrupSettings;
     return;
   }
   #ifdef DEBUG
@@ -148,11 +150,12 @@ SyrupSettingsManager::SyrupSettings* SyrupSettingsManager::load()
     Serial.println(F("Attempting to load settings."));
   #endif
   if (!verifyIntegrity(true)) {
-    taintAndRePrime();
     if (m_isLoaded) {
+      taintAndRePrime();
       save(m_settings);
     }
     else {
+      findStorageAddresses();
       load();
     }
   }

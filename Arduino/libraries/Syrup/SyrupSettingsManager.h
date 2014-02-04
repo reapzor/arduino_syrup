@@ -11,7 +11,6 @@
 #define DEBUG
 
 #define MEMORY_START 100
-#define CHECK_BYTE 0x63
 
 class SyrupSettingsManager
 {

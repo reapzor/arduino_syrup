@@ -16,7 +16,7 @@ Stats::~Stats()
 
 void Stats::reset()
 {
-  m_tempMin = 32767;
+  m_tempMin = 32767; // :(
   m_tempMax = 0;
   m_currentDuration = 0;
   m_lastDurationClosed = 0;
@@ -87,7 +87,7 @@ void Stats::update(TempProbe *tempProbe)
   switch (tempProbe->m_updatedParam)
   {
     case TempProbe::SCALE:
-      m_tempMin = 32767;
+      m_tempMin = 32767; // :(
       m_tempMax = 0;
       #ifdef DEBUG_OBSERVERS
         Serial.println(F("TEMP OBSERVER CHANGE! SCALE!"));

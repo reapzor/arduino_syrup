@@ -5,7 +5,7 @@ TempValveManager::TempValveManager(TempProbe *tempProbe, ValveController *valveC
     m_pTempProbe(tempProbe), m_pValveController(valveController), 
     Observer<TempProbe>()
 {
-  m_upperThreshold = 999.0;
+  m_upperThreshold = 999.0; // :(
   m_lowerThreshold = 0.0;
   
   m_thresholdRegion = UNDEF;
@@ -113,8 +113,6 @@ void TempValveManager::doUpperBoundsTask()
 {
   #ifdef DEBUG_BOUNDS
     Serial.println(F("TVM: UPPER BOUNDS"));
-    Serial.println(m_upperThreshold);
-    Serial.println(F("TVM: UPPDDR BOUNDS"));
   #endif
   m_pValveController->openValve();
 }
