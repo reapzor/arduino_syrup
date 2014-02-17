@@ -29,7 +29,6 @@ class LCDController
     static const int ROW_COUNT = 2;
     static const char NULL_TERMINATOR = '\0';
     LiquidCrystal* m_pLCD;
-    char m_currentText[ROW_COUNT][COLUMN_COUNT+1];
     LCDController(int rs, int enable, int d4, int d5, int d6, int d7);
     ~LCDController() 
     {
@@ -37,15 +36,13 @@ class LCDController
     }
     void write(int rowCount, char* rows[]);
     void write(int row, char *line);
-    void edit(int row, int startPosition, char *edit);
+    void edit(int row, int offset, char *edit);
     void clear();
     void clear(int row);
     void clear(int row, int offset);
+    void clear(int row, int offset, int length);
     void test();
-  private:
-    void resetText();
-    void setText(int row, char *line);
-    void editText(int row, int startPosition, char *edit);
+
 };
 
 #endif

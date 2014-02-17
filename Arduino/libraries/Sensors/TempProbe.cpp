@@ -19,9 +19,9 @@ TempProbe::TempProbe(int tempProbePin)
   m_delayTime = 0;
   #ifdef DEBUG_SWEEP_TEMP
     db_sweepDirection = false;
-    db_sweepMax = 75;
-    db_sweepMin = 45;
-    db_currentTemp = 60;
+    db_sweepMax = 255;
+    db_sweepMin = 110;
+    db_currentTemp = 140;
   #endif
 }
 
@@ -132,10 +132,15 @@ void TempProbe::unpause()
   m_paused = false;
 }
 
+void TempProbe::prime()
+{
+  m_delayTime = (long)millis();
+}
+
 void TempProbe::tick()
 {
   if ((long)millis()-m_delayTime >= 0) {
-    m_delayTime = (long)millis() + READ_DELAY;
+    m_delayTime += READ_DELAY;
     read();
   }
 }

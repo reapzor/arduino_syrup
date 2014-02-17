@@ -24,6 +24,7 @@ class Encoder : public Subject<Encoder>
     void read();
     void pause();
     void unpause();
+    void prime();
     void tick();
   private:
     bool m_paused;

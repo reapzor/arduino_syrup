@@ -18,7 +18,7 @@ void Stats::reset()
 {
   m_tempMin = 32767; // :(
   m_tempMax = 0;
-  m_currentDuration = 0;
+  m_currentDuration = 98000;
   m_lastDurationClosed = 0;
   m_averageDurationClosed = 0;
   m_averageDurationOpen = 0;
@@ -28,7 +28,6 @@ void Stats::reset()
   m_freeMem = 0;
   m_nextMinute = 0;
   m_nextSecond = 0;
-  m_firstTick = true;
 }
 
 void Stats::registerObservers()
@@ -57,7 +56,7 @@ void Stats::update(ValveController *valve)
       #endif
       sendNotify(COUNT_OPEN, false);
       m_currentDuration = 0;
-      setNextSecond();
+      resetNextSecond();
       sendNotify(CURRENT_DURATION, false);
       m_averageDurationClosed = ((m_averageDurationClosed * (m_countClosed-1))
         + m_lastDurationClosed) / m_countClosed;
@@ -73,7 +72,7 @@ void Stats::update(ValveController *valve)
       #endif
       sendNotify(COUNT_CLOSED, false);
       m_currentDuration = 0;
-      setNextSecond();
+      resetNextSecond();
       sendNotify(CURRENT_DURATION, false);
       m_averageDurationOpen = ((m_averageDurationOpen * (m_countOpen-1))
         + m_lastDurationOpen) / m_countOpen;
@@ -136,14 +135,27 @@ void Stats::sendNotify(e_statsValues statsValue, bool shouldReturnToIdle)
   }
 }
 
+void Stats::prime()
+{
+  updateFreeMem();
+  resetNextMinute();
+  resetNextSecond();
+}
+
+void Stats::resetNextSecond()
+{
+  m_nextSecond = (long)millis();
+  setNextSecond();
+}
+
+void Stats::resetNextMinute()
+{
+  m_nextMinute = (long)millis();
+  setNextMinute();
+}
+
 void Stats::tick()
 {
-  if (m_firstTick) {
-    setNextSecond();
-    setNextMinute();
-    updateFreeMem();
-    m_firstTick = false;
-  }
   if ((long)millis()-m_nextSecond >= 0) {
     setNextSecond();
     m_currentDuration++;
@@ -173,10 +185,10 @@ void Stats::updateFreeMem()
 
 void Stats::setNextSecond()
 {
-  m_nextSecond = (long)millis() + ONE_SECOND;
+  m_nextSecond += ONE_SECOND;
 }
 
 void Stats::setNextMinute()
 {
-  m_nextMinute = (long)millis() + ONE_MINUTE;
+  m_nextMinute += ONE_MINUTE;
 }

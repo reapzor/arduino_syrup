@@ -81,10 +81,15 @@ void Encoder::unpause()
   m_paused = false;
 }
 
+void Encoder::prime()
+{
+  m_delayTime = (long)millis();
+}
+
 void Encoder::tick()
 {
   if ((long)millis() - m_delayTime >= 0) {
-    m_delayTime = (long)millis() + READ_DELAY;
+    m_delayTime += READ_DELAY;
     read();
   }
 }

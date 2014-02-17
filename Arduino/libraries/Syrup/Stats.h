@@ -48,6 +48,7 @@ class Stats : public Subject<Stats>, public Observer<ValveController>,
     
     void registerObservers();
     void unregisterObservers();
+    void prime();
     void tick();
     
     void update(ValveController *valve);
@@ -61,11 +62,12 @@ class Stats : public Subject<Stats>, public Observer<ValveController>,
   private:
     static const int ONE_SECOND = 1000;
     static const long ONE_MINUTE = 60000;
-    bool m_firstTick;
     ValveController *m_pValveController;
     TempProbe *m_pTempProbe;
     long m_nextMinute;
     long m_nextSecond;
+    void resetNextSecond();
+    void resetNextMinute();
     void setNextSecond();
     void setNextMinute();
     void updateTempMinMax(float temp);

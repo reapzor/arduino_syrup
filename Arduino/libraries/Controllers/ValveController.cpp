@@ -101,24 +101,26 @@ void ValveController::changeValveState(bool ignoreDelay, e_valveState state)
     }
     m_stateIsForced = true;
   }  
-  m_valveState = state;
-  resetDelay();
-  switch(state)
-  {
-    case OPEN:
-      digitalWrite(m_valveSignalPin, HIGH);
-      break;
-    case CLOSED:
-      digitalWrite(m_valveSignalPin, LOW);
-      break;
+  if (m_valveState != state) {
+    m_valveState = state;    
+    switch(state)
+    {
+      case OPEN:
+        digitalWrite(m_valveSignalPin, HIGH);
+        break;
+      case CLOSED:
+        digitalWrite(m_valveSignalPin, LOW);
+        break;
+    }
+    #ifdef DEV
+      Serial.print(F("VALVE ON PIN "));
+      Serial.print(m_valveSignalPin);
+      Serial.print(F(" SET TO STATE: "));
+      Serial.println(state);
+    #endif
+    notify();
   }
-  #ifdef DEV
-    Serial.print(F("VALVE ON PIN "));
-    Serial.print(m_valveSignalPin);
-    Serial.print(F(" SET TO STATE: "));
-    Serial.println(state);
-  #endif
-  notify();
+  resetDelay();
 }
 
 void ValveController::resetDelay()

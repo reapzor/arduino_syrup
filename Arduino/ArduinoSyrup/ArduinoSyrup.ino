@@ -24,6 +24,8 @@
 #include <ValveController.h>
 #include <TempProbe.h>
 #include <LCDController.h>
+#include "ToggleButton.h"
+#include "OverrideSwitch.h"
 #include <SyrupSettingsManager.h>
 #include "Stats.h"
 #include "SyrupDisplayManager.h"
@@ -54,15 +56,16 @@ int Helpers::charSpacing(int integer) {
 
  LCDController lcd(12, 11, 5, 4, 3, 2);
  Encoder encoder(8,9);
- Button toggleButton(6);
- Button overrideSwitch(7);
+ ToggleButton toggleButton(6);
+ OverrideSwitch overrideSwitch(7);
  TempProbe tempProbe(1); 
  ValveController valveController(13);
  Stats stats(&valveController, &tempProbe);
  OverrideManager overrideManager(&toggleButton, &overrideSwitch, &valveController);
  TempValveManager tempValveManager(&tempProbe, &valveController);
  SyrupSettingsManager settingsManager;
- SyrupDisplayManager displayManager(&lcd, &tempProbe, &valveController, &stats);
+ SyrupDisplayManager displayManager(&lcd, &tempProbe, &valveController,
+     &stats, &overrideManager, &toggleButton);
 
  
 //const prog_uchar hi[] PROGMEM = "isfh\0";
@@ -78,14 +81,14 @@ int Helpers::charSpacing(int integer) {
 //  char *lines = "line hereline herelffffg";
 //  lines[1] = "line hereline herelffff\0";
 //stats.registerObservers();
-EEPROM.readInt(1);
-lcd.test();
+//EEPROM.readInt(1);
+//lcd.test();
 
 //  delay(1300);
 //  lcd.edit(1, 2, "N!");
 //delay(1300);
   //lcd.write(0, lines);
-  lcd.write(0, SyrupDisplayManager::s_welcomeLineOne);
+ // lcd.write(0, SyrupDisplayManager::s_welcomeLineOne);
 //  lcd.write(1, SyrupDisplayManager::s_welcomeLineOne);
   
 //    Serial.println(lcd.m_currentText[1]);
@@ -105,10 +108,11 @@ lcd.test();
    //Receiver *re = static_cast<Receiver *>(&r);
 //   MyCommand c(r);
 //   c.execute();
+
 tempValveManager.registerObservers();
 overrideManager.registerObservers();
-valveController.openValve();
-valveController.closeValve();
+stats.registerObservers();
+displayManager.registerObservers();
 
 //vc.forceCloseValve();
 //vc.releaseForcedState();
@@ -135,25 +139,30 @@ temp->temperatureChanged();
 */
 
 //settingsManager.save(settingsManager.m_settings);
-EEPROM.writeByte(168, 0xFF);
-EEPROM.writeByte(169, 0xFF);
+//EEPROM.writeByte(168, 0xFF);
+//EEPROM.writeByte(169, 0xFF);
+//settingsManager.resetClear();
 settingsManager.prime();
 
-//displayManager.setState(SyrupDisplayManager::WELCOME);
-Serial.println("lol");
-delay(1000);
-
+displayManager.setState(SyrupDisplayManager::WELCOME);
+encoder.prime();
+toggleButton.prime();
+overrideSwitch.prime();
+tempProbe.prime();
+displayManager.prime();
+stats.prime();
  } 
 
  void loop() { 
 //   delay(1000);
 //   long hi = millis();
    encoder.tick();
+   toggleButton.tick();
+   overrideSwitch.tick();
 //   long hi2 = millis();
    tempProbe.tick();
    valveController.tick();
-   toggleButton.tick();
-   overrideSwitch.tick();
+
    stats.tick();
    displayManager.tick();
   /* long bye = millis();

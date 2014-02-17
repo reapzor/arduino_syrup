@@ -37,6 +37,7 @@ class TempProbe : public Subject<TempProbe>
     int tempCInt();
     void pause();
     void unpause();
+    void prime();
     void tick();
     float convertReadingToF(int tempProbeReading);
     float convertReadingToF(float tempC);

@@ -9,12 +9,14 @@
 #include "TempProbe.h"
 #include "ValveController.h"
 #include "Stats.h"
+#include "ToggleButton.h"
+#include "OverrideManager.h"
 
 //#define DEBUG_OBSERVERS
 #define DEBUG
 
 class SyrupDisplayManager : public Observer<TempProbe>, public Observer<ValveController>,
-  public Observer<Stats>
+  public Observer<Stats>, public Observer<ToggleButton>, public Observer<OverrideManager>
 {
   public:
     enum e_displayState
@@ -34,7 +36,6 @@ class SyrupDisplayManager : public Observer<TempProbe>, public Observer<ValveCon
       OFF,
       UNDEF
     };
-    static const int m_validStates = 7;
     
     static char* s_welcomeLineOne;
     static char* s_welcomeLineTwo;
@@ -43,31 +44,34 @@ class SyrupDisplayManager : public Observer<TempProbe>, public Observer<ValveCon
     static char* s_mainValve;
     static char* s_mainTime;
     
-    static char* s_tempDegree;
+    static char* s_calculating;
+    static char* s_period; 
+    
+    static char* s_tempDegreeF;
+    static char* s_tempDegreeC;
     static char* s_valveStateOpen;
     static char* s_valveStateClosed;
+
+    static char* s_seenMax;
+    static char* s_seenMin;
+    static char* s_seenObserved;
     
-    static char* s_thresTempOpen;
-    static char* s_thresTempClose;
+    static char* s_last;
+    static char* s_duration;
     
-    static char* s_seenTempMax;
-    static char* s_seenTempMin;
-    
-    static char* s_lastDurClose;
-    static char* s_lastDurOpen;
-    
-    static char* s_secondsChar;
-    static char* s_minutesChar;
+    static char* s_daysChar;
     static char* s_hoursChar;
+    static char* s_zeroChar;
+    static char* s_secondsChar;
     
-    static char* s_averageDurClose;
-    static char* s_averageDurOpen;
+    static char* s_space;
     
-    static char* s_countOpen;
-    static char* s_countClose;
+    static char* s_average;
+
+    static char* s_count;
     
-    static char* s_overrideValveLineOne;
-    static char* s_overrideValveLineTwo;
+    static char* s_valveCaps;
+    static char* s_overrideValveOverride;
     
     static char* s_savedLineOne;
     static char* s_savedLineTwo;
@@ -75,29 +79,45 @@ class SyrupDisplayManager : public Observer<TempProbe>, public Observer<ValveCon
     static char* s_systemUptime;
     static char* s_systemFreeMem;
     
+    static char* s_colon;
+    
+    void prime();
     void tick();
     void setState(e_displayState state);
+    void transitionToNextState();
     void draw();
+    
+    void registerObservers();
+    void unregisterObservers();
     
     e_displayState m_displayState;
     
     void update(TempProbe *tempProbe);
     void update(ValveController *valve);
     void update(Stats *stats);
+    void update(ToggleButton *toggleButton);
+    void update(OverrideManager *overrideManager);
     
     SyrupDisplayManager(LCDController *lcd, TempProbe *tempProbe,
-      ValveController *valve, Stats *stats);
+      ValveController *valve, Stats *stats, OverrideManager *overrideManager,
+      ToggleButton *toggleButton);
     ~SyrupDisplayManager();
   
   private:
     bool m_shouldDraw;
-    char convertTimeToString();
-    char convertTempToString();
+    bool m_prepForTransition;
+    void appendDurationStringLeftOriented(char* string, unsigned long time);
+    void appendDurationStringRightOriented(char* string, unsigned long time);
+    void appendDurationString(char* string, unsigned long time, bool rightOriented);
+    void appendTempString(char* string);
+    void appendValveStateString(char* string);
     LCDController *m_pLCD;
     TempProbe *m_pTempProbe;
     ValveController *m_pValve;
     Stats *m_pStats;
-    static const int WELCOME_TRANSITION_DELAY = 5000;
+    OverrideManager *m_pOverrideManager;
+    ToggleButton *m_pToggleButton;
+    static const int WELCOME_TRANSITION_DELAY = 2000;
     static const int SETTING_SAVED_TRANSITION_DELAY = 2000;
     static const int DELAY_BETWEEN_POSSIBLE_SHOULD_DRAWS = 300;
     long m_currentDrawDelay;
@@ -107,6 +127,7 @@ class SyrupDisplayManager : public Observer<TempProbe>, public Observer<ValveCon
     long m_currentTransitionDelay;
     void drawWelcome();
     void drawMain();
+    void drawValveOverride();
     
     
 
