@@ -235,6 +235,7 @@ void SyrupDisplayManager::draw()
     case VALVE_OVERRIDE:
       drawValveOverride();
       break;
+      
     default:
       m_pLCD->clear();
       break;
@@ -248,9 +249,7 @@ void SyrupDisplayManager::drawValveOverride()
   strcpy(row1, s_valveCaps);
   strcat(row1, s_space);
   strcat(row1, s_overrideValveOverride);
-  m_pLCD->clear(0, 0, 5);
-  m_pLCD->clear(0, 18, 6);
-  m_pLCD->edit(0, 5, row1);
+
   
   int row2Length = strlen(s_mainValve)+strlen(s_colon)+strlen(s_space);
   char row2[row2Length+7];
@@ -258,8 +257,10 @@ void SyrupDisplayManager::drawValveOverride()
   strcat(row2, s_colon);
   strcat(row2, s_space);
   appendValveStateString(row2);
-  m_pLCD->clear(1, 0, 6);
-  m_pLCD->clear(1, 19, 5);
+  
+  m_pLCD->clear();
+  
+  m_pLCD->edit(0, 5, row1);
   m_pLCD->edit(1, 6, row2);
 }
 
@@ -276,18 +277,20 @@ void SyrupDisplayManager::drawMain()
   strcat(row1, s_colon);
   strcat(row1, s_space);
   appendTempString(row1);
-  m_pLCD->write(0, row1);
-  m_pLCD->edit(0, 19, s_mainTime);
+
   
   char row2[14];
   strcpy(row2, s_mainValve);
   strcat(row2, s_colon);
   strcat(row2, s_space);
   appendValveStateString(row2);
-  m_pLCD->write(1, row2);
   char row2Time[9];
   *row2Time = LCDController::NULL_TERMINATOR;
   appendDurationStringRightOriented(row2Time, m_pStats->m_currentDuration);
+  
+  m_pLCD->write(0, row1);
+  m_pLCD->edit(0, 19, s_mainTime);
+  m_pLCD->write(1, row2);
   m_pLCD->edit(1, 24-strlen(row2Time), row2Time);
 }
 
