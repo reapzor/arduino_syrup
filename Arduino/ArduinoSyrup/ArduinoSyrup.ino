@@ -53,7 +53,7 @@ int Helpers::charSpacing(int integer) {
 }
 */
 
-
+ SyrupSettingsManager settingsManager;
  LCDController lcd(12, 11, 5, 4, 3, 2);
  Encoder encoder(8,9);
  ToggleButton toggleButton(6);
@@ -63,7 +63,6 @@ int Helpers::charSpacing(int integer) {
  Stats stats(&valveController, &tempProbe);
  OverrideManager overrideManager(&toggleButton, &overrideSwitch, &valveController);
  TempValveManager tempValveManager(&tempProbe, &valveController);
- SyrupSettingsManager settingsManager;
  SyrupDisplayManager displayManager(&lcd, &tempProbe, &valveController,
      &stats, &overrideManager, &toggleButton);
 
@@ -73,7 +72,7 @@ int Helpers::charSpacing(int integer) {
 //char hine[10];
   
  void setup() { 
-    Serial.begin (57600);
+    //Serial.begin (57600);
     //EncoderObserver *obs = new EncoderObserver();
     //char buffer[300];
    // encoder.attach(*obs);

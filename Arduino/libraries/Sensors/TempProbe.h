@@ -6,7 +6,7 @@
 #include "Arduino.h"
 #include "Subject.h"
 //#define DEBUG_HW
-#define DEBUG
+//#define DEBUG
 #define DEBUG_SWEEP_TEMP
 
 class TempProbe : public Subject<TempProbe>

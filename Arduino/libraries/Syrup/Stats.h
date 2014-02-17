@@ -9,8 +9,8 @@
 #include "Observer.h"
 
 #define DEV
-#define DEBUG_OBSERVERS
-#define DEBUG
+//#define DEBUG_OBSERVERS
+//#define DEBUG
     
 class Stats : public Subject<Stats>, public Observer<ValveController>,
     public Observer<TempProbe>

@@ -7,7 +7,7 @@
 #include "Button.h"
 
 //#define DEBUG_HW
-#define DEBUG
+//#define DEBUG
 
 class OverrideSwitch : public Button<OverrideSwitch>
 {

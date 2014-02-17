@@ -5,8 +5,7 @@
 #include <Arduino.h>
 #include <LiquidCrystal.h>
 #define DEV
-#define DEBUG
-#define CURTEXT_DEBUG
+//#define DEBUG
 
 /*
   The circuit:

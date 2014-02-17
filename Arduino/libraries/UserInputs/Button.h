@@ -5,7 +5,7 @@
 #include "Arduino.h"
 #include "Subject.h"
 //#define DEBUG_HW
-#define DEBUG
+//#define DEBUG
 
 template <class T>
 class Button : public Subject<T>

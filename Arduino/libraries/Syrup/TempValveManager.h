@@ -9,9 +9,8 @@
 #include "ValveController.h"
 #include "TempProbe.h"
 
-#define DEBUG_THRES
+//#define DEBUG_THRES
 #define DEBUG_BOUNDS
-#define DEBUG
 
 class TempValveManager : public Observer<TempProbe>
 {

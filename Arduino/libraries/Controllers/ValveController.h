@@ -4,8 +4,8 @@
 
 #include "Arduino.h"
 #include "Subject.h"
-#define DEBUG
-#define DEV
+//#define DEBUG
+//#define DEV
 
 class ValveController : public Subject<ValveController>
 {

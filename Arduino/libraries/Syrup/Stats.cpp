@@ -18,7 +18,7 @@ void Stats::reset()
 {
   m_tempMin = 32767; // :(
   m_tempMax = 0;
-  m_currentDuration = 98000;
+  m_currentDuration = 0;
   m_lastDurationClosed = 0;
   m_averageDurationClosed = 0;
   m_averageDurationOpen = 0;

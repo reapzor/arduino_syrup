@@ -10,8 +10,8 @@
 #include "ToggleButton.h"
 #include "OverrideSwitch.h"
 
-#define DEBUG_OBSERVERS
-#define DEBUG
+//#define DEBUG_OBSERVERS
+//#define DEBUG
 
 class OverrideManager : public Subject<OverrideManager>, Observer<ToggleButton>,
   Observer<OverrideSwitch>
