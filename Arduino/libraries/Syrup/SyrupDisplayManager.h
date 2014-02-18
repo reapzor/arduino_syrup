@@ -11,12 +11,16 @@
 #include "Stats.h"
 #include "ToggleButton.h"
 #include "OverrideManager.h"
+#include "THRESEditor.h"
+#include "SyrupSettingsManager.h"
+#include "Encoder.h"
 
 //#define DEBUG_OBSERVERS
 #define DEBUG
 
 class SyrupDisplayManager : public Observer<TempProbe>, public Observer<ValveController>,
-  public Observer<Stats>, public Observer<ToggleButton>, public Observer<OverrideManager>
+  public Observer<Stats>, public Observer<ToggleButton>, public Observer<OverrideManager>, 
+  public Observer<THRESEditor>
 {
   public:
     enum e_displayState
@@ -55,6 +59,7 @@ class SyrupDisplayManager : public Observer<TempProbe>, public Observer<ValveCon
     static char* s_seenMax;
     static char* s_seenMin;
     static char* s_seenObserved;
+    static char* s_scale;
     
     static char* s_last;
     static char* s_duration;
@@ -97,10 +102,12 @@ class SyrupDisplayManager : public Observer<TempProbe>, public Observer<ValveCon
     void update(Stats *stats);
     void update(ToggleButton *toggleButton);
     void update(OverrideManager *overrideManager);
+    void update(THRESEditor *thresEditor);
     
     SyrupDisplayManager(LCDController *lcd, TempProbe *tempProbe,
       ValveController *valve, Stats *stats, OverrideManager *overrideManager,
-      ToggleButton *toggleButton);
+      ToggleButton *toggleButton, SyrupSettingsManager *settingsManager,
+      Encoder *encoder);
     ~SyrupDisplayManager();
   
   private:
@@ -109,18 +116,25 @@ class SyrupDisplayManager : public Observer<TempProbe>, public Observer<ValveCon
     void appendDurationStringLeftOriented(char* string, unsigned long time);
     void appendDurationStringRightOriented(char* string, unsigned long time);
     void appendDurationString(char* string, unsigned long time, bool rightOriented);
-    void appendTempString(char* string);
+    void appendTempString(char* string, float temp);
+    void appendTempStringMain(char* string);
     void appendValveStateString(char* string);
+    void appendTempScaleSymbol(char* string, TempProbe::e_scale scale);
     LCDController *m_pLCD;
     TempProbe *m_pTempProbe;
     ValveController *m_pValve;
     Stats *m_pStats;
     OverrideManager *m_pOverrideManager;
     ToggleButton *m_pToggleButton;
+    THRESEditor *m_pTHRESEditor;
+    Encoder *m_pEncoder;
+    SyrupSettingsManager *m_pSettingsManager;
+    static const int TOGGLE_BUTTON_ON_DURATION = 3000;
     static const int WELCOME_TRANSITION_DELAY = 2000;
     static const int SETTING_SAVED_TRANSITION_DELAY = 2000;
     static const int DELAY_BETWEEN_POSSIBLE_SHOULD_DRAWS = 300;
-    long m_currentDrawDelay;
+    static const int EDIT_MODE_BLINK_TIME = 500;
+    //long m_currentDrawDelay;
     static const e_displayState WELCOME_TRANSITION_STATE = MAIN;
     bool m_transitioning;
     e_displayState m_nextTransition;
@@ -128,8 +142,13 @@ class SyrupDisplayManager : public Observer<TempProbe>, public Observer<ValveCon
     void drawWelcome();
     void drawMain();
     void drawValveOverride();
-    
-    
+    void drawThres();
+    void editModeBlinkDraw(int row, int offset);
+    long m_toggleButtonStartTime;
+    long m_editModeBlinkTime;
+    bool m_editModeBlinkOn;
+    int m_editModeBlinkRow;
+    int m_editModeBlinkOffset;
 
 };
     

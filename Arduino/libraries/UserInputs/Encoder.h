@@ -10,7 +10,7 @@
 class Encoder : public Subject<Encoder>
 {
   public:
-    enum e_directionState
+    enum e_direction
     {
       UNDEF,
       IDLE,
@@ -20,7 +20,7 @@ class Encoder : public Subject<Encoder>
     Encoder(int triggerPin, int directionPin);
     int m_triggerPin;
     int m_directionPin;
-    e_directionState directionState;
+    e_direction m_direction;
     void read();
     void pause();
     void unpause();

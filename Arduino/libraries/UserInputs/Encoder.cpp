@@ -8,7 +8,7 @@ Encoder::Encoder(int triggerPin, int directionPin)
   m_directionPin = directionPin;
   pinMode(triggerPin, INPUT_PULLUP);
   pinMode(directionPin, INPUT_PULLUP);
-  directionState = UNDEF;
+  m_direction = UNDEF;
   m_paused = false;
   m_delayTime = 0;
 }
@@ -43,28 +43,28 @@ void Encoder::read()
   //If the trigger hit, begin processing the value
   // if the current direction hasnt been caught yet.
   if (triggerPinValue == LOW 
-      && directionState == IDLE) {
+      && m_direction == IDLE) {
     //Low is a forward turn.
     if (directionPinValue == LOW) {
-      directionState = FORWARD;
+      m_direction = FORWARD;
     }
     //High is a backward turn.
     else {
-      directionState = BACKWARD;
+      m_direction = BACKWARD;
     }
     #ifdef DEBUG
       Serial.print(F("EncState "));
-      Serial.println(directionState);
+      Serial.println(m_direction);
     #endif
     notify();
   }
   //Trigger pin is reset, reset direction if needed.
   else if (triggerPinValue == HIGH) {
-    if (directionState != IDLE) {
-      directionState = IDLE;
+    if (m_direction != IDLE) {
+      m_direction = IDLE;
       #ifdef DEBUG_HW
         Serial.print(F("EncState "));
-        Serial.println(directionState);
+        Serial.println(m_direction);
       #endif
       notify();
     }

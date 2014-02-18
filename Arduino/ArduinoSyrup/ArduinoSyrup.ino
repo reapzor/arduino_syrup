@@ -31,7 +31,7 @@
 #include "SyrupDisplayManager.h"
 #include "OverrideManager.h"
 #include "TempValveManager.h"
-
+#include "THRESEditor.h"
 
 /*
 class Helpers {
@@ -64,15 +64,14 @@ int Helpers::charSpacing(int integer) {
  OverrideManager overrideManager(&toggleButton, &overrideSwitch, &valveController);
  TempValveManager tempValveManager(&tempProbe, &valveController);
  SyrupDisplayManager displayManager(&lcd, &tempProbe, &valveController,
-     &stats, &overrideManager, &toggleButton);
-
- 
+     &stats, &overrideManager, &toggleButton, &settingsManager);
+     
 //const prog_uchar hi[] PROGMEM = "isfh\0";
 //const prog_uchar *hi2[] = {hi};
 //char hine[10];
   
  void setup() { 
-    //Serial.begin (57600);
+    Serial.begin (57600);
     //EncoderObserver *obs = new EncoderObserver();
     //char buffer[300];
    // encoder.attach(*obs);

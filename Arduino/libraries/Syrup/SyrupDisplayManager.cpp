@@ -3,19 +3,26 @@
 
 SyrupDisplayManager::SyrupDisplayManager(LCDController *lcd,
   TempProbe *tempProbe, ValveController *valve, Stats *stats,
-  OverrideManager *overrideManager, ToggleButton *toggleButton) :
+  OverrideManager *overrideManager, ToggleButton *toggleButton,
+  SyrupSettingsManager *settingsManager, Encoder *encoder) :
     m_pLCD(lcd), m_pTempProbe(tempProbe), m_pValve(valve), m_pStats(stats),
     m_pOverrideManager(overrideManager), m_pToggleButton(toggleButton),
+    m_pSettingsManager(settingsManager), m_pEncoder(encoder),
     Observer<TempProbe>(), Observer<ValveController>(), Observer<Stats>(),
-    Observer<ToggleButton>(), Observer<OverrideManager>()
+    Observer<ToggleButton>(), Observer<OverrideManager>(), Observer<THRESEditor>()
 {
   m_transitioning = false;
   m_nextTransition = UNDEF;
   m_currentTransitionDelay = 0;
-  m_currentDrawDelay = 0;
+  m_toggleButtonStartTime = 0;
   m_shouldDraw = false;
   m_displayState = UNDEF;
   m_prepForTransition = false;
+  m_pTHRESEditor = NULL;
+  m_editModeBlinkTime = 0;
+  m_editModeBlinkOn = false;
+  m_editModeBlinkRow = 0;
+  m_editModeBlinkOffset = 0;
 }
 
 SyrupDisplayManager::~SyrupDisplayManager()
@@ -41,6 +48,7 @@ char* SyrupDisplayManager::s_valveStateClosed = "CLOSED";
 char* SyrupDisplayManager::s_seenMax = "MAX";
 char* SyrupDisplayManager::s_seenMin = "MIN";
 char* SyrupDisplayManager::s_seenObserved = "OBSERVED";
+char* SyrupDisplayManager::s_scale = "Scale";
 
 char* SyrupDisplayManager::s_last = "LAST";
 char* SyrupDisplayManager::s_duration = "DUR";
@@ -89,7 +97,7 @@ void SyrupDisplayManager::setState(e_displayState state)
   }
   if (m_displayState == state) {
     #ifdef DEBUG
-      Serial.print(F("ALREADY SET THIS DISPLAY STATE: "));
+      Serial.print(F("ALREADY SET DISPLAY STATE: "));
       Serial.println(state);
     #endif
     return;
@@ -108,12 +116,43 @@ void SyrupDisplayManager::setState(e_displayState state)
     m_nextTransition = SAVED;
     m_transitioning = true;
   }
+  if (m_pTHRESEditor != NULL) {
+    m_pTHRESEditor->leaveEditMode();
+    m_pTHRESEditor->detach(this);
+    delete(m_pTHRESEditor);
+    m_pTHRESEditor = NULL;
+  }
   #ifdef DEBUG
-    Serial.print(F("SETTING LCD STATE TO: "));
+    Serial.print(F("LCD STATE: "));
     Serial.println(state);
   #endif
   m_displayState = state;
   draw();
+}
+
+void SyrupDisplayManager::update(THRESEditor *thresEditor)
+{
+  switch(thresEditor->m_editItem)
+  {
+    case THRESEditor::UPPER_THRES:
+      char upperTemp[7];
+      *upperTemp = LCDController::NULL_TERMINATOR;
+      appendTempString(upperTemp, thresEditor->m_upperThreshold);
+      m_pLCD->edit(0, 6, upperTemp);
+      break;
+    case THRESEditor::LOWER_THRES:
+      char lowerTemp[7];
+      *lowerTemp = LCDController::NULL_TERMINATOR;
+      appendTempString(lowerTemp, thresEditor->m_lowerThreshold);
+      m_pLCD->edit(1, 8, lowerTemp);
+      break;
+    case THRESEditor::TEMP_SCALE:
+      char tempScale[2];
+      *tempScale = LCDController::NULL_TERMINATOR;
+      appendTempScaleSymbol(tempScale, thresEditor->m_tempScale);
+      m_pLCD->edit(1, 23, tempScale);
+      break;
+  }
 }
 
 void SyrupDisplayManager::update(TempProbe *tempProbe)
@@ -126,9 +165,8 @@ void SyrupDisplayManager::update(TempProbe *tempProbe)
         case MAIN:
           char tempStr[8];
           *tempStr = LCDController::NULL_TERMINATOR;
-          appendTempString(tempStr);
-          int offset = strlen(s_mainTemp)+strlen(s_colon)+strlen(s_space);
-          m_pLCD->edit(0, offset, tempStr);
+          appendTempStringMain(tempStr);
+          m_pLCD->edit(0, 6, tempStr);
           break;
       }
       break;
@@ -145,11 +183,11 @@ void SyrupDisplayManager::update(ValveController *valve)
   switch (m_displayState)
   {
     case MAIN:
-      offset = strlen(s_mainValve)+strlen(s_colon)+strlen(s_space);
+      offset = 7;
       row = 1;
       break;
     case VALVE_OVERRIDE:
-      offset = 6+strlen(s_mainValve)+strlen(s_colon)+strlen(s_space);
+      offset = 13;
       row = 1;
       break;
     default:
@@ -180,12 +218,14 @@ void SyrupDisplayManager::update(ToggleButton *toggleButton)
 {
   if (toggleButton->m_buttonState == ToggleButton::ON) {
     m_prepForTransition = true;
+    m_toggleButtonStartTime = (long)millis()+TOGGLE_BUTTON_ON_DURATION;
   }
   else {
-    if (m_prepForTransition) {
+    if (m_prepForTransition && m_pTHRESEditor == NULL) {
       transitionToNextState();
-      m_prepForTransition = false;
     }
+    m_prepForTransition = false;
+    m_toggleButtonStartTime = 0;
   }
 }
 
@@ -203,7 +243,7 @@ void SyrupDisplayManager::update(OverrideManager *overrideManager)
 
 void SyrupDisplayManager::prime()
 {
-  m_currentDrawDelay = (long)millis();
+  //m_currentDrawDelay = (long)millis();
 }
 
 void SyrupDisplayManager::tick()
@@ -211,15 +251,70 @@ void SyrupDisplayManager::tick()
   if (m_transitioning && (long)millis()-m_currentTransitionDelay >= 0) {
     m_currentTransitionDelay = 0;
     m_transitioning = false;
-    m_displayState = m_nextTransition;
+    e_displayState displayState = m_nextTransition;
     m_nextTransition = UNDEF;
-    m_shouldDraw = true;
+    setState(displayState);
   }
-  if (m_shouldDraw && (long)millis()-m_currentDrawDelay >= 0) {
+  if (m_prepForTransition && m_displayState == THRES) {
+    if ((long)millis()-m_toggleButtonStartTime >= 0) {
+      m_prepForTransition = false;
+      if (m_pTHRESEditor && m_pTHRESEditor->isInEditMode()) {
+        m_pTHRESEditor->save();
+        m_pTHRESEditor->leaveEditMode();
+        if (m_editModeBlinkOn) {
+          editModeBlinkDraw(m_editModeBlinkRow, m_editModeBlinkOffset);
+        }
+        m_pTHRESEditor->detach(this);
+        delete(m_pTHRESEditor);
+        m_pTHRESEditor = NULL;
+        setState(SAVED);
+        setState(THRES);
+      }
+      else {
+        m_pTHRESEditor = new THRESEditor(m_pSettingsManager, m_pEncoder, m_pToggleButton);
+        m_pTHRESEditor->attach(this);
+        m_pTHRESEditor->enterEditMode();
+      }
+    }
+  }
+  if (m_pTHRESEditor != NULL && m_displayState == THRES &&
+      (long)millis()-m_editModeBlinkTime >= 0) {
+    switch(m_pTHRESEditor->m_editItem)
+    {
+      case THRESEditor::UPPER_THRES:
+        editModeBlinkDraw(0, 4);
+        break;
+      case THRESEditor::LOWER_THRES:
+        editModeBlinkDraw(1, 6);
+        break;
+      case THRESEditor::TEMP_SCALE:
+        editModeBlinkDraw(1, 21);
+        break;
+    }
+    m_editModeBlinkTime += EDIT_MODE_BLINK_TIME;
+  }
+  /*if (m_shouldDraw && (long)millis()-m_currentDrawDelay >= 0) {
     m_currentDrawDelay += DELAY_BETWEEN_POSSIBLE_SHOULD_DRAWS;
     m_shouldDraw = false;
     draw();
+  }*/
+}
+
+void SyrupDisplayManager::editModeBlinkDraw(int row, int offset)
+{
+  if (m_editModeBlinkOn) {
+    if (m_editModeBlinkRow != row || m_editModeBlinkOffset != offset) {
+      m_pLCD->edit(m_editModeBlinkRow, m_editModeBlinkOffset, s_colon);
+    }
+    m_editModeBlinkOn = false;
+    m_pLCD->edit(row, offset, s_colon);
   }
+  else {
+    m_editModeBlinkOn = true;
+    m_pLCD->edit(row, offset, s_space);
+  }
+  m_editModeBlinkRow = row;
+  m_editModeBlinkOffset = offset;
 }
 
 void SyrupDisplayManager::draw()
@@ -235,24 +330,63 @@ void SyrupDisplayManager::draw()
     case VALVE_OVERRIDE:
       drawValveOverride();
       break;
-      
+    case THRES:
+      drawThres();
+      break;
     default:
       m_pLCD->clear();
+      char row[24];
+      strcpy(row, s_welcomeLineOne);
+      m_pLCD->write(1, row);      
       break;
   }
 }
 
+void SyrupDisplayManager::drawThres()
+{
+  char row1[13];
+  //strcpy(row1, s_seenMax);
+  //strcat(row1, s_space);
+  //strcat(row1, s_mainTemp);
+  strcpy(row1, s_valveStateOpen);
+  strcat(row1, s_colon);
+  strcat(row1, s_space);
+  appendTempString(row1, m_pSettingsManager->m_settings.m_upperThreshold);
+  
+  char row2[15];
+  //strcpy(row2, s_seenMin);
+  //strcat(row2, s_space);
+  //strcat(row2, s_mainTemp);
+  strcpy(row2, s_valveStateClosed);
+  strcat(row2, s_colon);
+  strcat(row2, s_space);      
+  appendTempString(row2, m_pSettingsManager->m_settings.m_lowerThreshold);
+  
+  int scaleStrLength = 8;
+  char scaleStr[scaleStrLength+1];
+  strcpy(scaleStr, s_scale);
+  strcat(scaleStr, s_colon);
+  strcat(scaleStr, s_space);
+  appendTempScaleSymbol(scaleStr, m_pSettingsManager->m_settings.m_tempScale);
+  
+  char settingsStr[9];
+  strcpy(settingsStr, s_savedLineOne);
+  strncat(settingsStr, s_savedLineOne, 1);
+  
+  m_pLCD->write(0, row1);
+  m_pLCD->write(1, row2);
+  m_pLCD->edit(1, 24-scaleStrLength, scaleStr);
+  m_pLCD->edit(0, 24-8, settingsStr);
+}
+
 void SyrupDisplayManager::drawValveOverride()
 {
-  int row1Length = strlen(s_valveCaps)+strlen(s_space)+strlen(s_overrideValveOverride);
-  char row1[row1Length+1];
+  char row1[15];
   strcpy(row1, s_valveCaps);
   strcat(row1, s_space);
   strcat(row1, s_overrideValveOverride);
-
   
-  int row2Length = strlen(s_mainValve)+strlen(s_colon)+strlen(s_space);
-  char row2[row2Length+7];
+  char row2[14];
   strcpy(row2, s_mainValve);
   strcat(row2, s_colon);
   strcat(row2, s_space);
@@ -273,28 +407,38 @@ void SyrupDisplayManager::drawWelcome()
 void SyrupDisplayManager::drawMain()
 {
   char row1[18];
+  //sprintf(row1, "%s%s%s", s_mainTemp, s_colon, s_space);
   strcpy(row1, s_mainTemp);
   strcat(row1, s_colon);
   strcat(row1, s_space);
-  appendTempString(row1);
+  appendTempStringMain(row1);
 
-  
   char row2[14];
   strcpy(row2, s_mainValve);
   strcat(row2, s_colon);
   strcat(row2, s_space);
   appendValveStateString(row2);
-  char row2Time[9];
+  char row2Time[8];
   *row2Time = LCDController::NULL_TERMINATOR;
   appendDurationStringRightOriented(row2Time, m_pStats->m_currentDuration);
   
   m_pLCD->write(0, row1);
   m_pLCD->edit(0, 19, s_mainTime);
   m_pLCD->write(1, row2);
-  m_pLCD->edit(1, 24-strlen(row2Time), row2Time);
+  m_pLCD->edit(1, 17, row2Time);
 }
 
-void SyrupDisplayManager::appendTempString(char *string)
+void SyrupDisplayManager::appendTempString(char *string, float temp)
+{
+  char tempStr[7];
+  dtostrf(temp, 4, 2, tempStr);
+  strcat(string, tempStr);
+  for (int x = strlen(tempStr); x < 6; x++) {
+    strcat(string, s_space);
+  }
+}
+
+void SyrupDisplayManager::appendTempStringMain(char *string)
 {
   char tempStr[8];
   *tempStr = LCDController::NULL_TERMINATOR;
@@ -305,17 +449,18 @@ void SyrupDisplayManager::appendTempString(char *string)
     strcat(tempStr, s_period);
   }
   else {
-    char temp[7];
     switch(m_pTempProbe->getScale())
     {
       case TempProbe::FAHRENHEIT:
-        dtostrf(m_pTempProbe->m_tempF, 4, 2, temp);
-        strcat(tempStr, temp);    
+        char tempNumStrF[7];
+        dtostrf(m_pTempProbe->m_tempF, 4, 2, tempNumStrF);
+        strcat(tempStr, tempNumStrF);
         strcat(tempStr, s_tempDegreeF);
         break;
       case TempProbe::CELCIUS:
-        dtostrf(m_pTempProbe->m_tempC, 4, 2, temp);
-        strcat(tempStr, temp);      
+        char tempNumStrC[7];
+        dtostrf(m_pTempProbe->m_tempC, 4, 2, tempNumStrC);
+        strcat(tempStr, tempNumStrC);
         strcat(tempStr, s_tempDegreeC);
         break;
     }
@@ -323,6 +468,19 @@ void SyrupDisplayManager::appendTempString(char *string)
   strcat(string, tempStr);
   for (int x = strlen(tempStr); x < 7; x++) {
     strcat(string, s_space);
+  }
+}
+
+void SyrupDisplayManager::appendTempScaleSymbol(char* string, TempProbe::e_scale scale)
+{
+  switch(scale)
+  {
+    case TempProbe::FAHRENHEIT:
+      strcat(string, s_tempDegreeF);
+      break;
+    case TempProbe::CELCIUS:
+      strcat(string, s_tempDegreeC);
+      break;
   }
 }
 

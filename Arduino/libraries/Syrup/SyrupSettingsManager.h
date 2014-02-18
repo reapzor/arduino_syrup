@@ -7,8 +7,8 @@
 #include "TempProbe.h"
 #include "StandardCPlusPlus.h"
 
-//#define DEBUG_HW
 //#define DEBUG
+#define DEV
 
 #define MEMORY_START 100
 
@@ -32,6 +32,7 @@ class SyrupSettingsManager
         m_upperThreshold = 300.0;
         m_lowerThreshold = 0.0;
         m_version = 1;
+        m_tempScale = TempProbe::FAHRENHEIT;
       }
       bool m_tainted;
       float m_upperThreshold;
@@ -43,8 +44,8 @@ class SyrupSettingsManager
         reset();
       }
     } m_settings;
-    SyrupSettings* load();
-    void save(SyrupSettings &syrupSettings);
+    void load();
+    void save();
     void prime();
     void resetClear();
   private:

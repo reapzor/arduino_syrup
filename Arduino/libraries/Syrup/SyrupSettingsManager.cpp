@@ -15,21 +15,20 @@ SyrupSettingsManager::~SyrupSettingsManager()
 {
 }
 
-void SyrupSettingsManager::save(SyrupSettings &syrupSettings)
+void SyrupSettingsManager::save()
 {
   if (m_isUseless) {
-    m_settings = syrupSettings;
     return;
   }
   #ifdef DEBUG
     Serial.println(F("Attempting to save settings."));
   #endif
   for (int x = 0; x < 3; x++) {
-    EEPROM.writeBlock(m_storageAddresses[x], syrupSettings);
+    EEPROM.writeBlock(m_storageAddresses[x], m_settings);
   }
   if (!verifyIntegrity(false)) {
     taintAndRePrime();
-    save(syrupSettings);
+    save();
   }
 }
 
@@ -72,6 +71,12 @@ bool SyrupSettingsManager::verifyIntegrity(bool loadSettings)
     #endif
     if (loadSettings) {
       m_settings = settings1;
+      #ifdef DEV
+        Serial.println(F("SETTINGS:"));
+        Serial.println(m_settings.m_upperThreshold);
+        Serial.println(m_settings.m_lowerThreshold);
+        Serial.println(m_settings.m_tempScale);
+      #endif
       m_isLoaded = true;
     }
   }
@@ -88,7 +93,7 @@ void SyrupSettingsManager::resetClear()
   m_settings.reset();
   m_isLoaded = false;
   m_isUseless = false;
-  save(m_settings);
+  save();
 }
 
 void SyrupSettingsManager::taintAndRePrime()
@@ -141,10 +146,10 @@ void SyrupSettingsManager::findStorageAddresses()
   #endif
 }
 
-SyrupSettingsManager::SyrupSettings* SyrupSettingsManager::load()
+void SyrupSettingsManager::load()
 {
   if (m_isLoaded) {
-    return &m_settings;
+    return;
   }
   #ifdef DEBUG
     Serial.println(F("Attempting to load settings."));
@@ -152,13 +157,12 @@ SyrupSettingsManager::SyrupSettings* SyrupSettingsManager::load()
   if (!verifyIntegrity(true)) {
     if (m_isLoaded) {
       taintAndRePrime();
-      save(m_settings);
+      save();
     }
     else {
       findStorageAddresses();
       load();
     }
   }
-  return &m_settings;
 }
 
