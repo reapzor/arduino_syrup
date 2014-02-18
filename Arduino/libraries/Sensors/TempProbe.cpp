@@ -9,7 +9,6 @@ TempProbe::TempProbe(int tempProbePin)
   m_tempProbePin = tempProbePin;
   m_digitalMappedTempProbePin = getDigitalAnalogPin(tempProbePin);
   digitalWrite(m_digitalMappedTempProbePin, LOW);
-  m_activeScale = FAHRENHEIT;
   m_paused = false;
   m_readCount = 0;
   m_candidateTempProbeReading = 0;
@@ -72,26 +71,9 @@ void TempProbe::read()
         Serial.print(m_tempC);
         Serial.println(F("C."));
       #endif
-      m_updatedParam = TEMP;
       notify();
-      m_updatedParam = IDLE;
     }
   }
-}
-
-void TempProbe::setScale(e_scale scale)
-{
-  if (m_activeScale != scale) {
-    m_activeScale = scale;
-    m_updatedParam = SCALE;
-    notify();
-    m_updatedParam = IDLE;
-  }
-}
-
-TempProbe::e_scale TempProbe::getScale()
-{
-  return m_activeScale;
 }
 
 float TempProbe::convertReadingToC(int tempProbeReading)

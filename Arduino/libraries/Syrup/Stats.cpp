@@ -83,34 +83,7 @@ void Stats::update(ValveController *valve)
 
 void Stats::update(TempProbe *tempProbe)
 {
-  switch (tempProbe->m_updatedParam)
-  {
-    case TempProbe::SCALE:
-      m_tempMin = 32767; // :(
-      m_tempMax = 0;
-      #ifdef DEBUG_OBSERVERS
-        Serial.println(F("TEMP OBSERVER CHANGE! SCALE!"));
-      #endif
-    case TempProbe::TEMP:
-      #ifdef DEBUG_OBSERVERS
-        Serial.print(F("TEMP OBSERVER CHANGE! TEMPF: "));
-        Serial.println(tempProbe->m_tempF);
-      #endif
-      switch (tempProbe->getScale())
-      {
-        case TempProbe::FAHRENHEIT:
-          updateTempMinMax(tempProbe->m_tempF);
-          break;
-        case TempProbe::CELCIUS:
-          updateTempMinMax(tempProbe->m_tempC);
-          break;
-      }
-      break;
-  }
-}
-
-void Stats::updateTempMinMax(float temp)
-{
+  int temp = tempProbe->m_tempProbeReading;
   if (temp < m_tempMin) {
     m_tempMin = temp;
     sendNotify(TEMP_MIN);
@@ -118,7 +91,7 @@ void Stats::updateTempMinMax(float temp)
   if (temp > m_tempMax) {
     m_tempMax = temp;
     sendNotify(TEMP_MAX);
-  }
+  }  
 }
 
 void Stats::sendNotify(e_statsValues statsValue)

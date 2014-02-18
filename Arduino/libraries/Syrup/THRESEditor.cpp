@@ -115,6 +115,9 @@ void THRESEditor::alterCurrentEditItemValue(float addition)
   {
     case UPPER_THRES:
       m_upperThreshold += addition;
+      if (m_upperThreshold >= 1000.00) {
+        m_upperThreshold = 999.99;
+      }
       #ifdef DEBUG
         Serial.print(F("UPPER THRES: "));
         Serial.println(m_upperThreshold);
@@ -122,6 +125,9 @@ void THRESEditor::alterCurrentEditItemValue(float addition)
       break;
     case LOWER_THRES:
       m_lowerThreshold += addition;
+      if (m_lowerThreshold <= -100.00) {
+        m_lowerThreshold = -99.99;
+      }
       #ifdef DEBUG
         Serial.print(F("LOWER THRES: "));
         Serial.println(m_lowerThreshold);

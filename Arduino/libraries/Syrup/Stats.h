@@ -33,8 +33,8 @@ class Stats : public Subject<Stats>, public Observer<ValveController>,
     };
     
     e_statsValues m_updatedStatsValue;
-    float m_tempMin;
-    float m_tempMax;
+    int m_tempMin;
+    int m_tempMax;
     unsigned long m_currentDuration;
     unsigned long m_lastDurationClosed;
     unsigned long m_lastDurationOpen;
@@ -70,11 +70,10 @@ class Stats : public Subject<Stats>, public Observer<ValveController>,
     void resetNextMinute();
     void setNextSecond();
     void setNextMinute();
-    void updateTempMinMax(float temp);
     void updateFreeMem();
     void sendNotify(e_statsValues statsValue);
     void sendNotify(e_statsValues statsValue, bool shouldReturnToIdle);
-
+    
 };
 
 #endif

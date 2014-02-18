@@ -62,9 +62,9 @@ int Helpers::charSpacing(int integer) {
  ValveController valveController(13);
  Stats stats(&valveController, &tempProbe);
  OverrideManager overrideManager(&toggleButton, &overrideSwitch, &valveController);
- TempValveManager tempValveManager(&tempProbe, &valveController);
+ TempValveManager tempValveManager(&tempProbe, &valveController, &settingsManager);
  SyrupDisplayManager displayManager(&lcd, &tempProbe, &valveController,
-     &stats, &overrideManager, &toggleButton, &settingsManager);
+     &stats, &overrideManager, &toggleButton, &settingsManager, &encoder);
      
 //const prog_uchar hi[] PROGMEM = "isfh\0";
 //const prog_uchar *hi2[] = {hi};

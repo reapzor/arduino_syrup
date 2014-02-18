@@ -157,18 +157,13 @@ void SyrupDisplayManager::update(THRESEditor *thresEditor)
 
 void SyrupDisplayManager::update(TempProbe *tempProbe)
 {
-  switch (tempProbe->m_updatedParam)
+  switch (m_displayState)
   {
-    case TempProbe::TEMP:
-      switch (m_displayState)
-      {
-        case MAIN:
-          char tempStr[8];
-          *tempStr = LCDController::NULL_TERMINATOR;
-          appendTempStringMain(tempStr);
-          m_pLCD->edit(0, 6, tempStr);
-          break;
-      }
+    case MAIN:
+      char tempStr[8];
+      *tempStr = LCDController::NULL_TERMINATOR;
+      appendTempStringMain(tempStr);
+      m_pLCD->edit(0, 6, tempStr);
       break;
   }
 }
@@ -449,7 +444,7 @@ void SyrupDisplayManager::appendTempStringMain(char *string)
     strcat(tempStr, s_period);
   }
   else {
-    switch(m_pTempProbe->getScale())
+    switch(m_pSettingsManager->m_settings.m_tempScale)
     {
       case TempProbe::FAHRENHEIT:
         char tempNumStrF[7];

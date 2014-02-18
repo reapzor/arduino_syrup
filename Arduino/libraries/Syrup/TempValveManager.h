@@ -8,6 +8,7 @@
 #include "Subject.h"
 #include "ValveController.h"
 #include "TempProbe.h"
+#include "SyrupSettingsManager.h"
 
 //#define DEBUG_THRES
 #define DEBUG_BOUNDS
@@ -25,17 +26,12 @@ class TempValveManager : public Observer<TempProbe>
       UPPER,
       OVER
     };
-    TempValveManager(TempProbe *tempProbe, ValveController *valveController);
+    TempValveManager(TempProbe *tempProbe, ValveController *valveController,
+      SyrupSettingsManager *settingsManager);
     ~TempValveManager();
     e_thresholdRegion m_thresholdRegion;
     static const int BOUNDS_THRESHOLD_F = 1;
     static const float BOUNDS_THRESHOLD_C = 0.555;
-    //In anticipation of this becoming an observable, 
-    //  use sets instead of direct access
-    void setUpperThreshold(float upperThreshold);
-    void setLowerThreshold(float lowerThreshold);
-    float getUpperThreshold();
-    float getLowerThreshold();
     
     void update(TempProbe *tempProbe);
     
@@ -43,10 +39,9 @@ class TempValveManager : public Observer<TempProbe>
     void unregisterObservers();
     
   private:
-    float m_upperThreshold;
-    float m_lowerThreshold;
     TempProbe *m_pTempProbe;
     ValveController *m_pValveController;
+    SyrupSettingsManager *m_pSettingsManager;
     void updateThreshold(float temp, float boundsThreshold);
     bool m_hasDoneUpperBoundsTask;
     void tryUpperBoundsTask();

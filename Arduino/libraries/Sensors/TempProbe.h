@@ -5,6 +5,7 @@
 
 #include "Arduino.h"
 #include "Subject.h"
+
 //#define DEBUG_HW
 //#define DEBUG
 #define DEBUG_SWEEP_TEMP
@@ -17,22 +18,13 @@ class TempProbe : public Subject<TempProbe>
       FAHRENHEIT,
       CELCIUS
     };
-    enum e_updatedParam
-    {
-      IDLE,
-      SCALE,
-      TEMP
-    };
     float m_tempF;
     float m_tempC;
     int m_tempProbeReading;
     int m_tempProbePin;
     int m_digitalMappedTempProbePin;
-    e_updatedParam m_updatedParam;
     TempProbe(int tempProbePin);
     void read();
-    void setScale(e_scale scale);
-    e_scale getScale();
     int tempFInt();
     int tempCInt();
     void pause();
@@ -44,7 +36,6 @@ class TempProbe : public Subject<TempProbe>
     float convertReadingToC(int tempProbeReading);
     
   private:
-    e_scale m_activeScale;
     bool m_paused;
     int m_readCount;
     long m_candidateTempProbeReading;
