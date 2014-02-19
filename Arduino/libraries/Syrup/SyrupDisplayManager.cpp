@@ -28,7 +28,8 @@ SyrupDisplayManager::SyrupDisplayManager(LCDController *lcd,
 
 SyrupDisplayManager::~SyrupDisplayManager()
 {
-
+  //cancelThresEditMode();
+  //We will never die, and we want to save 100 bytes of progmem...
 }
 
 char* SyrupDisplayManager::s_welcomeLineOne = "THE SYRUP-O-MATIC  V1.0";
@@ -68,7 +69,7 @@ char* SyrupDisplayManager::s_count = "COUNT";
 char* SyrupDisplayManager::s_valveCaps = "VALVE";
 char* SyrupDisplayManager::s_overrideValveOverride = "OVERRIDE";
 
-char* SyrupDisplayManager::s_savedLineOne = "SETTING";
+char* SyrupDisplayManager::s_savedLineOne = "SETTINGS";
 char* SyrupDisplayManager::s_savedLineTwo = "SAVED";
 char* SyrupDisplayManager::s_canceledLineTwo = "CANCELED";
 
@@ -375,9 +376,6 @@ void SyrupDisplayManager::drawSettingCanceled()
 void SyrupDisplayManager::drawThres()
 {
   char row[15];
-  //strcpy(row1, s_seenMax);
-  //strcat(row1, s_space);
-  //strcat(row1, s_mainTemp);
   strcpy(row, s_valveStateOpen);
   strcat(row, s_colon);
   strcat(row, s_space);
@@ -397,9 +395,7 @@ void SyrupDisplayManager::drawThres()
   appendTempScaleSymbol(row, m_pSettingsManager->m_settings.m_tempScale);
   m_pLCD->edit(1, scaleStrOffset, row);
   
-  strcpy(row, s_savedLineOne);
-  strncat(row, s_savedLineOne, 1);
-  m_pLCD->edit(0, scaleStrOffset, row);
+  m_pLCD->edit(0, scaleStrOffset, s_savedLineOne);
 }
 
 void SyrupDisplayManager::drawValveOverride()
