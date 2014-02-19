@@ -11,7 +11,7 @@
 #include "SyrupSettingsManager.h"
 
 //#define DEBUG_THRES
-#define DEBUG_BOUNDS
+//#define DEBUG_BOUNDS
 
 class TempValveManager : public Observer<TempProbe>
 {

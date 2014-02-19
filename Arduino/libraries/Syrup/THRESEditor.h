@@ -9,7 +9,7 @@
 #include "SyrupSettingsManager.h"
 #include "ToggleButton.h"
 
-#define DEBUG
+//#define DEBUG
 //#define DEBUG_OBSERVERS
 
 class THRESEditor : public Subject<THRESEditor>, public Observer<Encoder>, 

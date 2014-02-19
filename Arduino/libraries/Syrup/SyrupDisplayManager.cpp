@@ -14,7 +14,8 @@ SyrupDisplayManager::SyrupDisplayManager(LCDController *lcd,
   m_transitioning = false;
   m_nextTransition = UNDEF;
   m_currentTransitionDelay = 0;
-  m_toggleButtonStartTime = 0;
+  m_toggleButtonHoldDelay = 0;
+  m_toggleButtonCountDelay = 0;
   m_shouldDraw = false;
   m_displayState = UNDEF;
   m_prepForTransition = false;
@@ -69,6 +70,7 @@ char* SyrupDisplayManager::s_overrideValveOverride = "OVERRIDE";
 
 char* SyrupDisplayManager::s_savedLineOne = "SETTING";
 char* SyrupDisplayManager::s_savedLineTwo = "SAVED";
+char* SyrupDisplayManager::s_canceledLineTwo = "CANCELED";
 
 char* SyrupDisplayManager::s_systemUptime = "UPTIME";
 char* SyrupDisplayManager::s_systemFreeMem = "FREE MEM";
@@ -107,13 +109,13 @@ void SyrupDisplayManager::setState(e_displayState state)
     m_nextTransition = WELCOME_TRANSITION_STATE;
     m_transitioning = true;
   }
-  if (state == SAVED) {
+  if (state == SAVED || state == CANCELED) {
     m_currentTransitionDelay = (long)millis() + SETTING_SAVED_TRANSITION_DELAY;
     //Note: You must called setState(SAVED); and another state immediately after for it
     //  to transition to: setState(SAVED); setState(THRES);
     //Otherwise it will sit there forever and not auto transition.
     //Which is a valid state, I guess... If you want...
-    m_nextTransition = SAVED;
+    m_nextTransition = state;
     m_transitioning = true;
   }
   if (m_pTHRESEditor != NULL) {
@@ -213,14 +215,29 @@ void SyrupDisplayManager::update(ToggleButton *toggleButton)
 {
   if (toggleButton->m_buttonState == ToggleButton::ON) {
     m_prepForTransition = true;
-    m_toggleButtonStartTime = (long)millis()+TOGGLE_BUTTON_ON_DURATION;
+    m_toggleButtonHoldDelay = (long)millis()+TOGGLE_BUTTON_ON_DURATION;
+    if (m_displayState == THRES) {
+      if ((long)millis()-m_toggleButtonCountDelay >= 0 && m_toggleButtonPressCount >= 1) {
+        m_toggleButtonPressCount = 0;
+      }
+      if (m_toggleButtonPressCount == 0) {
+        m_toggleButtonCountDelay = (long)millis()+TOGGLE_BUTTON_COUNT_DURATION;
+      }
+      m_toggleButtonPressCount++;
+      if (m_toggleButtonPressCount >= TOGGLE_BUTTON_COUNT) {
+        m_toggleButtonPressCount = 0;
+        cancelThresEditMode();
+        setState(CANCELED);
+        setState(THRES);
+      }
+    }
   }
   else {
     if (m_prepForTransition && m_pTHRESEditor == NULL) {
       transitionToNextState();
     }
     m_prepForTransition = false;
-    m_toggleButtonStartTime = 0;
+    m_toggleButtonHoldDelay = 0;
   }
 }
 
@@ -241,6 +258,19 @@ void SyrupDisplayManager::prime()
   //m_currentDrawDelay = (long)millis();
 }
 
+void SyrupDisplayManager::cancelThresEditMode()
+{
+  if (m_pTHRESEditor != NULL) {
+    m_pTHRESEditor->leaveEditMode();
+    m_pTHRESEditor->detach(this);
+    delete(m_pTHRESEditor);
+    m_pTHRESEditor = NULL;
+  }
+ // if (m_editModeBlinkOn) {
+    //editModeBlinkDraw(m_editModeBlinkRow, m_editModeBlinkOffset);
+  //}
+}
+
 void SyrupDisplayManager::tick()
 {
   if (m_transitioning && (long)millis()-m_currentTransitionDelay >= 0) {
@@ -251,17 +281,11 @@ void SyrupDisplayManager::tick()
     setState(displayState);
   }
   if (m_prepForTransition && m_displayState == THRES) {
-    if ((long)millis()-m_toggleButtonStartTime >= 0) {
+    if ((long)millis()-m_toggleButtonHoldDelay >= 0) {
       m_prepForTransition = false;
       if (m_pTHRESEditor && m_pTHRESEditor->isInEditMode()) {
         m_pTHRESEditor->save();
-        m_pTHRESEditor->leaveEditMode();
-        if (m_editModeBlinkOn) {
-          editModeBlinkDraw(m_editModeBlinkRow, m_editModeBlinkOffset);
-        }
-        m_pTHRESEditor->detach(this);
-        delete(m_pTHRESEditor);
-        m_pTHRESEditor = NULL;
+        cancelThresEditMode();
         setState(SAVED);
         setState(THRES);
       }
@@ -328,13 +352,31 @@ void SyrupDisplayManager::draw()
     case THRES:
       drawThres();
       break;
+    case SAVED:
+      drawSettingSaved();
+      break;
+    case CANCELED:
+      drawSettingCanceled();
+      break;
     default:
       m_pLCD->clear();
-      char row[24];
-      strcpy(row, s_welcomeLineOne);
-      m_pLCD->write(1, row);      
+      m_pLCD->write(1, s_welcomeLineOne);      
       break;
   }
+}
+
+void SyrupDisplayManager::drawSettingSaved()
+{
+  m_pLCD->clear();
+  m_pLCD->edit(0, 8, s_savedLineOne);
+  m_pLCD->edit(1, 9, s_savedLineTwo);
+}
+
+void SyrupDisplayManager::drawSettingCanceled()
+{
+  m_pLCD->clear();
+  m_pLCD->edit(0, 7, s_savedLineOne);
+  m_pLCD->edit(1, 8, s_canceledLineTwo);
 }
 
 void SyrupDisplayManager::drawThres()

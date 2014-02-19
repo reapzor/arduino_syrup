@@ -8,7 +8,7 @@
 #include "StandardCPlusPlus.h"
 
 //#define DEBUG
-#define DEV
+//#define DEV
 
 #define MEMORY_START 100
 

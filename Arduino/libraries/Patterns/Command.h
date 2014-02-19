@@ -4,7 +4,7 @@
 #define Command_h
 
 #include "Arduino.h"
-
+/*
 class CommandBase
 {
   public:
