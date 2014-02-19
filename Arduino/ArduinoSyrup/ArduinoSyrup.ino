@@ -142,7 +142,7 @@ temp->temperatureChanged();
 //settingsManager.resetClear();
 settingsManager.prime();
 
-displayManager.setState(SyrupDisplayManager::WELCOME);
+//displayManager.setState(SyrupDisplayManager::WELCOME);
 encoder.prime();
 toggleButton.prime();
 overrideSwitch.prime();

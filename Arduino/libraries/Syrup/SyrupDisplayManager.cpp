@@ -99,7 +99,7 @@ void SyrupDisplayManager::setState(e_displayState state)
   }
   if (m_displayState == state) {
     #ifdef DEBUG
-      Serial.print(F("ALREADY SET DISPLAY STATE: "));
+      Serial.print(F("ALREADY SET STATE: "));
       Serial.println(state);
     #endif
     return;
@@ -118,12 +118,7 @@ void SyrupDisplayManager::setState(e_displayState state)
     m_nextTransition = state;
     m_transitioning = true;
   }
-  if (m_pTHRESEditor != NULL) {
-    m_pTHRESEditor->leaveEditMode();
-    m_pTHRESEditor->detach(this);
-    delete(m_pTHRESEditor);
-    m_pTHRESEditor = NULL;
-  }
+  cancelThresEditMode();
   #ifdef DEBUG
     Serial.print(F("LCD STATE: "));
     Serial.println(state);
@@ -134,25 +129,21 @@ void SyrupDisplayManager::setState(e_displayState state)
 
 void SyrupDisplayManager::update(THRESEditor *thresEditor)
 {
+  char value[7];
+  *value = LCDController::NULL_TERMINATOR;
   switch(thresEditor->m_editItem)
   {
     case THRESEditor::UPPER_THRES:
-      char upperTemp[7];
-      *upperTemp = LCDController::NULL_TERMINATOR;
-      appendTempString(upperTemp, thresEditor->m_upperThreshold);
-      m_pLCD->edit(0, 6, upperTemp);
+      appendTempString(value, thresEditor->m_upperThreshold);
+      m_pLCD->edit(0, 6, value);
       break;
     case THRESEditor::LOWER_THRES:
-      char lowerTemp[7];
-      *lowerTemp = LCDController::NULL_TERMINATOR;
-      appendTempString(lowerTemp, thresEditor->m_lowerThreshold);
-      m_pLCD->edit(1, 8, lowerTemp);
+      appendTempString(value, thresEditor->m_lowerThreshold);
+      m_pLCD->edit(1, 8, value);
       break;
     case THRESEditor::TEMP_SCALE:
-      char tempScale[2];
-      *tempScale = LCDController::NULL_TERMINATOR;
-      appendTempScaleSymbol(tempScale, thresEditor->m_tempScale);
-      m_pLCD->edit(1, 23, tempScale);
+      appendTempScaleSymbol(value, thresEditor->m_tempScale);
+      m_pLCD->edit(1, 23, value);
       break;
   }
 }
@@ -190,7 +181,7 @@ void SyrupDisplayManager::update(ValveController *valve)
     default:
       return;
   }
-  m_pLCD->edit(1, offset, valveStr);
+  m_pLCD->edit(row, offset, valveStr);
 }
 
 void SyrupDisplayManager::update(Stats *stats)
@@ -204,7 +195,7 @@ void SyrupDisplayManager::update(Stats *stats)
             char row2Time[8];
             *row2Time = LCDController::NULL_TERMINATOR;
             appendDurationStringRightOriented(row2Time, stats->m_currentDuration);
-            m_pLCD->edit(1, 24-7, row2Time);
+            m_pLCD->edit(1, 17, row2Time);
             break;
       }
       break;
@@ -216,6 +207,8 @@ void SyrupDisplayManager::update(ToggleButton *toggleButton)
   if (toggleButton->m_buttonState == ToggleButton::ON) {
     m_prepForTransition = true;
     m_toggleButtonHoldDelay = (long)millis()+TOGGLE_BUTTON_ON_DURATION;
+    //This probably would be better somewhere else, but progmem is happy having it here
+    //Same goes for the other 'THRES' observer(which is coupled with button and tick)
     if (m_displayState == THRES) {
       if ((long)millis()-m_toggleButtonCountDelay >= 0 && m_toggleButtonPressCount >= 1) {
         m_toggleButtonPressCount = 0;
@@ -255,7 +248,7 @@ void SyrupDisplayManager::update(OverrideManager *overrideManager)
 
 void SyrupDisplayManager::prime()
 {
-  //m_currentDrawDelay = (long)millis();
+  setState(WELCOME);
 }
 
 void SyrupDisplayManager::cancelThresEditMode()
@@ -381,58 +374,49 @@ void SyrupDisplayManager::drawSettingCanceled()
 
 void SyrupDisplayManager::drawThres()
 {
-  char row1[13];
+  char row[15];
   //strcpy(row1, s_seenMax);
   //strcat(row1, s_space);
   //strcat(row1, s_mainTemp);
-  strcpy(row1, s_valveStateOpen);
-  strcat(row1, s_colon);
-  strcat(row1, s_space);
-  appendTempString(row1, m_pSettingsManager->m_settings.m_upperThreshold);
+  strcpy(row, s_valveStateOpen);
+  strcat(row, s_colon);
+  strcat(row, s_space);
+  appendTempString(row, m_pSettingsManager->m_settings.m_upperThreshold);
+  m_pLCD->write(0, row);
   
-  char row2[15];
-  //strcpy(row2, s_seenMin);
-  //strcat(row2, s_space);
-  //strcat(row2, s_mainTemp);
-  strcpy(row2, s_valveStateClosed);
-  strcat(row2, s_colon);
-  strcat(row2, s_space);      
-  appendTempString(row2, m_pSettingsManager->m_settings.m_lowerThreshold);
+  strcpy(row, s_valveStateClosed);
+  strcat(row, s_colon);
+  strcat(row, s_space);      
+  appendTempString(row, m_pSettingsManager->m_settings.m_lowerThreshold);
+  m_pLCD->write(1, row);
   
-  int scaleStrLength = 8;
-  char scaleStr[scaleStrLength+1];
-  strcpy(scaleStr, s_scale);
-  strcat(scaleStr, s_colon);
-  strcat(scaleStr, s_space);
-  appendTempScaleSymbol(scaleStr, m_pSettingsManager->m_settings.m_tempScale);
+  int scaleStrOffset = 16;
+  strcpy(row, s_scale);
+  strcat(row, s_colon);
+  strcat(row, s_space);
+  appendTempScaleSymbol(row, m_pSettingsManager->m_settings.m_tempScale);
+  m_pLCD->edit(1, scaleStrOffset, row);
   
-  char settingsStr[9];
-  strcpy(settingsStr, s_savedLineOne);
-  strncat(settingsStr, s_savedLineOne, 1);
-  
-  m_pLCD->write(0, row1);
-  m_pLCD->write(1, row2);
-  m_pLCD->edit(1, 24-scaleStrLength, scaleStr);
-  m_pLCD->edit(0, 24-8, settingsStr);
+  strcpy(row, s_savedLineOne);
+  strncat(row, s_savedLineOne, 1);
+  m_pLCD->edit(0, scaleStrOffset, row);
 }
 
 void SyrupDisplayManager::drawValveOverride()
 {
-  char row1[15];
-  strcpy(row1, s_valveCaps);
-  strcat(row1, s_space);
-  strcat(row1, s_overrideValveOverride);
-  
-  char row2[14];
-  strcpy(row2, s_mainValve);
-  strcat(row2, s_colon);
-  strcat(row2, s_space);
-  appendValveStateString(row2);
-  
   m_pLCD->clear();
+
+  char row[15];
+  strcpy(row, s_valveCaps);
+  strcat(row, s_space);
+  strcat(row, s_overrideValveOverride);
+  m_pLCD->edit(0, 5, row);
   
-  m_pLCD->edit(0, 5, row1);
-  m_pLCD->edit(1, 6, row2);
+  strcpy(row, s_mainValve);
+  strcat(row, s_colon);
+  strcat(row, s_space);
+  appendValveStateString(row);
+  m_pLCD->edit(1, 6, row);
 }
 
 void SyrupDisplayManager::drawWelcome()
@@ -443,44 +427,41 @@ void SyrupDisplayManager::drawWelcome()
 
 void SyrupDisplayManager::drawMain()
 {
-  char row1[18];
+  char row[18];
   //sprintf(row1, "%s%s%s", s_mainTemp, s_colon, s_space);
-  strcpy(row1, s_mainTemp);
-  strcat(row1, s_colon);
-  strcat(row1, s_space);
-  appendTempStringMain(row1);
-
-  char row2[14];
-  strcpy(row2, s_mainValve);
-  strcat(row2, s_colon);
-  strcat(row2, s_space);
-  appendValveStateString(row2);
-  char row2Time[8];
-  *row2Time = LCDController::NULL_TERMINATOR;
-  appendDurationStringRightOriented(row2Time, m_pStats->m_currentDuration);
-  
-  m_pLCD->write(0, row1);
+  strcpy(row, s_mainTemp);
+  strcat(row, s_colon);
+  strcat(row, s_space);
+  appendTempStringMain(row);
+  m_pLCD->write(0, row);
   m_pLCD->edit(0, 19, s_mainTime);
-  m_pLCD->write(1, row2);
-  m_pLCD->edit(1, 17, row2Time);
+  
+  strcpy(row, s_mainValve);
+  strcat(row, s_colon);
+  strcat(row, s_space);
+  appendValveStateString(row);
+  m_pLCD->write(1, row);
+  
+  *row = LCDController::NULL_TERMINATOR;
+  appendDurationStringRightOriented(row, m_pStats->m_currentDuration);
+  m_pLCD->edit(1, 17, row);
 }
 
 void SyrupDisplayManager::appendTempString(char *string, float temp)
 {
+  int charLength = 6;
   char tempStr[7];
   dtostrf(temp, 4, 2, tempStr);
   strcat(string, tempStr);
-  for (int x = strlen(tempStr); x < 6; x++) {
-    strcat(string, s_space);
-  }
+  appendSpaces(string, charLength, tempStr);
 }
 
 void SyrupDisplayManager::appendTempStringMain(char *string)
 {
+  int charLength = 7;
   char tempStr[8];
-  *tempStr = LCDController::NULL_TERMINATOR;
   if (m_pTempProbe->m_tempProbeReading == 0) {
-    strcat(tempStr, s_calculating);
+    strcpy(tempStr, s_calculating);
     strcat(tempStr, s_period);
     strcat(tempStr, s_period);
     strcat(tempStr, s_period);
@@ -489,23 +470,17 @@ void SyrupDisplayManager::appendTempStringMain(char *string)
     switch(m_pSettingsManager->m_settings.m_tempScale)
     {
       case TempProbe::FAHRENHEIT:
-        char tempNumStrF[7];
-        dtostrf(m_pTempProbe->m_tempF, 4, 2, tempNumStrF);
-        strcat(tempStr, tempNumStrF);
+        dtostrf(m_pTempProbe->m_tempF, 4, 2, tempStr);
         strcat(tempStr, s_tempDegreeF);
         break;
       case TempProbe::CELCIUS:
-        char tempNumStrC[7];
-        dtostrf(m_pTempProbe->m_tempC, 4, 2, tempNumStrC);
-        strcat(tempStr, tempNumStrC);
+        dtostrf(m_pTempProbe->m_tempC, 4, 2, tempStr);
         strcat(tempStr, s_tempDegreeC);
         break;
     }
   }
   strcat(string, tempStr);
-  for (int x = strlen(tempStr); x < 7; x++) {
-    strcat(string, s_space);
-  }
+  appendSpaces(string, charLength, tempStr);
 }
 
 void SyrupDisplayManager::appendTempScaleSymbol(char* string, TempProbe::e_scale scale)
@@ -550,7 +525,12 @@ void SyrupDisplayManager::appendDurationStringRightOriented(char* string, unsign
 void SyrupDisplayManager::appendDurationString(char* string, unsigned long time,
   bool rightOriented)
 {
-  char durationStr[8];
+  int charLength = 7;
+  int dayTime = 86400;
+  int hourTime = 3600;
+  int minuteTime = 60;
+  int integerBase = 10;
+  char durationStr[charLength+1];
   *durationStr = LCDController::NULL_TERMINATOR;
   int minutes = 0;
   int hours = 0;
@@ -558,30 +538,29 @@ void SyrupDisplayManager::appendDurationString(char* string, unsigned long time,
   int seconds = 0;
   bool ignoreSeconds = false;
   bool ignoreMinutes = false;
-  while (time >= 86400) {
-    time -= 86400;
+  char timePart[5];
+  while (time >= dayTime) {
+    time -= dayTime;
     days++;
   }
-  while (time >= 3600) {
-    time -= 3600;
+  while (time >= hourTime) {
+    time -= hourTime;
     hours++;
   }
-  while (time >= 60) {
-    time -= 60;
+  while (time >= minuteTime) {
+    time -= minuteTime;
     minutes++;
   }
   seconds = time;
   if (days >= 100) {
-    char dayStr[7];
-    itoa(days, dayStr, 10);
-    strcat(durationStr, dayStr);
+    itoa(days, timePart, integerBase);
+    strcat(durationStr, timePart);
     strcat(durationStr, s_daysChar);
   }
   else {
     if (days > 0) {
-      char dayStr[3];
-      itoa(days, dayStr, 10);
-      strcat(durationStr, dayStr);
+      itoa(days, timePart, integerBase);
+      strcat(durationStr, timePart);
       strcat(durationStr, s_daysChar);
       if (hours > 0) {
         strcat(durationStr, s_space);
@@ -590,9 +569,8 @@ void SyrupDisplayManager::appendDurationString(char* string, unsigned long time,
       ignoreSeconds = true;
     }
     if (hours > 0) {
-      char hourStr[3];
-      itoa(hours, hourStr, 10);
-      strcat(durationStr, hourStr);
+      itoa(hours, timePart, integerBase);
+      strcat(durationStr, timePart);
       if (ignoreMinutes) {
         strcat(durationStr, s_hoursChar);
       }
@@ -610,9 +588,8 @@ void SyrupDisplayManager::appendDurationString(char* string, unsigned long time,
       if (minutes < 10) {
         strcat(durationStr, s_zeroChar);
       }
-      char minuteStr[3];
-      itoa(minutes, minuteStr, 10);
-      strcat(durationStr, minuteStr);
+      itoa(minutes, timePart, integerBase);
+      strcat(durationStr, timePart);
       if (!ignoreSeconds) {
         strcat(durationStr, s_colon);
       }
@@ -621,28 +598,30 @@ void SyrupDisplayManager::appendDurationString(char* string, unsigned long time,
       if (seconds < 10) {
         strcat(durationStr, s_zeroChar);
       }
-      char secondStr[3];
-      itoa(seconds, secondStr, 10);
-      strcat(durationStr, secondStr);
+      itoa(seconds, timePart, integerBase);
+      strcat(durationStr, timePart);
       if (minutes == 0) {
         strcat(durationStr, s_secondsChar);
       }
     }
   }
   if (rightOriented) {
-    for (int x = 0; x < 7-strlen(durationStr); x++) {
-      strcat(string, s_space);
-    }
+    appendSpaces(string, charLength, durationStr);
     strcat(string, durationStr);
   }
   else {
     strcat(string, durationStr);
-    for (int x = strlen(durationStr); x < 7; x++) {
-      strcat(string, s_space);
-    }
+    appendSpaces(string, charLength, durationStr);
   }
 }
 
+void SyrupDisplayManager::appendSpaces(char* string, int length, char* baseString)
+{
+  int spacesNeeded = length-strlen(baseString);
+  for (int x = 0; x < spacesNeeded; x++) {
+    strcat(string, s_space);
+  }
+}
 
 void SyrupDisplayManager::registerObservers()
 {
@@ -661,13 +640,5 @@ void SyrupDisplayManager::unregisterObservers()
   m_pOverrideManager->detach(this);
   m_pToggleButton->detach(this);
 }
-
-/*
-
-long eventTimeout=(long)millis()+1000;
-if((long)millis()-eventTimeout>=0) {
-eventTimeout=(long)millis()+1000;
-}
-*/
 
 

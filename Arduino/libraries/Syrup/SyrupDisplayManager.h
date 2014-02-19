@@ -122,6 +122,8 @@ class SyrupDisplayManager : public Observer<TempProbe>, public Observer<ValveCon
     void appendTempStringMain(char* string);
     void appendValveStateString(char* string);
     void appendTempScaleSymbol(char* string, TempProbe::e_scale scale);
+    void appendSpaces(char* string, int length, char* baseString);
+    
     LCDController *m_pLCD;
     TempProbe *m_pTempProbe;
     ValveController *m_pValve;
