@@ -4,12 +4,15 @@
 SyrupDisplayManager::SyrupDisplayManager(LCDController *lcd,
   TempProbe *tempProbe, ValveController *valve, Stats *stats,
   OverrideManager *overrideManager, ToggleButton *toggleButton,
-  SyrupSettingsManager *settingsManager, Encoder *encoder) :
+  SyrupSettingsManager *settingsManager, Encoder *encoder,
+  TempValveManager *tempValveManager) :
     m_pLCD(lcd), m_pTempProbe(tempProbe), m_pValve(valve), m_pStats(stats),
     m_pOverrideManager(overrideManager), m_pToggleButton(toggleButton),
     m_pSettingsManager(settingsManager), m_pEncoder(encoder),
+    m_pTempValveManager(tempValveManager),
     Observer<TempProbe>(), Observer<ValveController>(), Observer<Stats>(),
-    Observer<ToggleButton>(), Observer<OverrideManager>(), Observer<THRESEditor>()
+    Observer<ToggleButton>(), Observer<OverrideManager>(), Observer<THRESEditor>(),
+    Observer<TempValveManager>()
 {
   m_transitioning = false;
   m_nextTransition = UNDEF;
@@ -233,6 +236,11 @@ void SyrupDisplayManager::update(ToggleButton *toggleButton)
     m_prepForTransition = false;
     m_toggleButtonHoldDelay = 0;
   }
+}
+
+void SyrupDisplayManager::update(TempValveManager *tempValveManager)
+{
+  Serial.println(tempValveManager->m_thresholdRegion);
 }
 
 void SyrupDisplayManager::update(OverrideManager *overrideManager)
@@ -618,6 +626,7 @@ void SyrupDisplayManager::registerObservers()
   m_pStats->attach(this);
   m_pOverrideManager->attach(this);
   m_pToggleButton->attach(this);
+  m_pTempValveManager->attach(this);
 }
 
 void SyrupDisplayManager::unregisterObservers()
@@ -627,6 +636,7 @@ void SyrupDisplayManager::unregisterObservers()
   m_pStats->detach(this);
   m_pOverrideManager->detach(this);
   m_pToggleButton->detach(this);
+  m_pTempValveManager->detach(this);
 }
 
 

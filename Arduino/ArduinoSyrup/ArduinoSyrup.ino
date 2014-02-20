@@ -46,7 +46,8 @@
  TempValveManager tempValveManager(&tempProbe, &valveController, &settingsManager);
  
  SyrupDisplayManager displayManager(&lcd, &tempProbe, &valveController,
-     &stats, &overrideManager, &toggleButton, &settingsManager, &encoder);    
+     &stats, &overrideManager, &toggleButton, &settingsManager, &encoder,
+     &tempValveManager);    
      
      
      

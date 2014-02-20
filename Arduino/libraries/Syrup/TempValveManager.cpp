@@ -5,7 +5,7 @@ TempValveManager::TempValveManager(TempProbe *tempProbe, ValveController *valveC
   SyrupSettingsManager *settingsManager) :
     m_pTempProbe(tempProbe), m_pValveController(valveController), 
     m_pSettingsManager(settingsManager),
-    Observer<TempProbe>()
+    Observer<TempProbe>(), Subject<TempValveManager>()
 {
   m_thresholdRegion = UNDEF;
   m_hasDoneUpperBoundsTask = false;
@@ -49,6 +49,7 @@ void TempValveManager::updateThreshold(float temp, float boundsThreshold)
       Serial.println(F("TVM: OVER"));
     #endif
     tryUpperBoundsTask();
+    notify();
     return;
   }
   if (temp >= upperThreshold && temp < (upperThreshold + boundsThreshold)
@@ -58,6 +59,7 @@ void TempValveManager::updateThreshold(float temp, float boundsThreshold)
       Serial.println(F("TVM: UPPER"));
     #endif
     tryUpperBoundsTask();
+    notify();
     return;
   }
   if (temp <= (upperThreshold - boundsThreshold) && m_thresholdRegion >= UPPER
@@ -66,6 +68,7 @@ void TempValveManager::updateThreshold(float temp, float boundsThreshold)
     #ifdef DEBUG_THRES
       Serial.println(F("TVM: DESCENDING"));
     #endif
+    notify();
     return;
   }
   if (temp >= (lowerThreshold + boundsThreshold) && m_thresholdRegion < MEDIAN_ASCENDING
@@ -74,6 +77,7 @@ void TempValveManager::updateThreshold(float temp, float boundsThreshold)
     #ifdef DEBUG_THRES
       Serial.println(F("TVM: ASCENDING"));
     #endif
+    notify();
     return;
   }
   if (temp >= (lowerThreshold - boundsThreshold) && temp <= lowerThreshold
@@ -83,6 +87,7 @@ void TempValveManager::updateThreshold(float temp, float boundsThreshold)
       Serial.println(F("TVM: LOWER"));
     #endif
     tryLowerBoundsTask();
+    notify();
     return;
   }
   if (temp < (lowerThreshold - boundsThreshold) && m_thresholdRegion != BELOW) {
@@ -91,6 +96,7 @@ void TempValveManager::updateThreshold(float temp, float boundsThreshold)
       Serial.println(F("TVM: BELOW"));
     #endif
     tryLowerBoundsTask();
+    notify();
     return;
   }
 }

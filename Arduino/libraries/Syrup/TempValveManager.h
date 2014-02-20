@@ -13,7 +13,7 @@
 //#define DEBUG_THRES
 //#define DEBUG_BOUNDS
 
-class TempValveManager : public Observer<TempProbe>
+class TempValveManager : public Observer<TempProbe>, public Subject<TempValveManager>
 {
   public:
     enum e_thresholdRegion

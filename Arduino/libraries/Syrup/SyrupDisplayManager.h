@@ -14,13 +14,14 @@
 #include "THRESEditor.h"
 #include "SyrupSettingsManager.h"
 #include "Encoder.h"
+#include "TempValveManager.h"
 
 //#define DEBUG_OBSERVERS
 #define DEBUG
 
 class SyrupDisplayManager : public Observer<TempProbe>, public Observer<ValveController>,
   public Observer<Stats>, public Observer<ToggleButton>, public Observer<OverrideManager>, 
-  public Observer<THRESEditor>
+  public Observer<THRESEditor>, public Observer<TempValveManager>
 {
   public:
     enum e_displayState
@@ -105,11 +106,12 @@ class SyrupDisplayManager : public Observer<TempProbe>, public Observer<ValveCon
     void update(ToggleButton *toggleButton);
     void update(OverrideManager *overrideManager);
     void update(THRESEditor *thresEditor);
+    void update(TempValveManager *tempValveManager);
     
     SyrupDisplayManager(LCDController *lcd, TempProbe *tempProbe,
       ValveController *valve, Stats *stats, OverrideManager *overrideManager,
       ToggleButton *toggleButton, SyrupSettingsManager *settingsManager,
-      Encoder *encoder);
+      Encoder *encoder, TempValveManager *tempValveManager);
     ~SyrupDisplayManager();
   
   private:
@@ -131,6 +133,8 @@ class SyrupDisplayManager : public Observer<TempProbe>, public Observer<ValveCon
     THRESEditor *m_pTHRESEditor;
     Encoder *m_pEncoder;
     SyrupSettingsManager *m_pSettingsManager;
+    TempValveManager *m_pTempValveManager;
+    
     static const int TOGGLE_BUTTON_COUNT_DURATION = 2000;
     static const int TOGGLE_BUTTON_COUNT = 3;
     static const int TOGGLE_BUTTON_ON_DURATION = 3000;
@@ -139,6 +143,7 @@ class SyrupDisplayManager : public Observer<TempProbe>, public Observer<ValveCon
     static const int DELAY_BETWEEN_POSSIBLE_SHOULD_DRAWS = 300;
     static const int EDIT_MODE_BLINK_TIME = 500;
     static const e_displayState WELCOME_TRANSITION_STATE = MAIN;
+    
     bool m_transitioning;
     e_displayState m_nextTransition;
     long m_currentTransitionDelay;
