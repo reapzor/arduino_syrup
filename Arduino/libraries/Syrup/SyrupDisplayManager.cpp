@@ -249,6 +249,7 @@ void SyrupDisplayManager::update(OverrideManager *overrideManager)
 
 void SyrupDisplayManager::prime()
 {
+  registerObservers();
   setState(WELCOME);
 }
 

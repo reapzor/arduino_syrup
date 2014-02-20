@@ -53,16 +53,13 @@
  void setup() { 
     Serial.begin (57600);
     
-    tempValveManager.registerObservers();
-    overrideManager.registerObservers();
-    stats.registerObservers();
-    displayManager.registerObservers();
-    
     settingsManager.prime();
     encoder.prime();
     toggleButton.prime();
     overrideSwitch.prime();
     tempProbe.prime();
+    tempValveManager.registerObservers();
+    overrideManager.registerObservers();
     displayManager.prime();
     stats.prime();
  } 

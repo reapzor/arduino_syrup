@@ -111,6 +111,7 @@ void Stats::sendNotify(e_statsValues statsValue, bool shouldReturnToIdle)
 
 void Stats::prime()
 {
+  registerObservers();
   updateFreeMem();
   resetNextMinute();
   resetNextSecond();
