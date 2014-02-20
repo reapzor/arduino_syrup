@@ -9,7 +9,6 @@ TempProbe::TempProbe(int tempProbePin)
   m_tempProbePin = tempProbePin;
   m_digitalMappedTempProbePin = getDigitalAnalogPin(tempProbePin);
   digitalWrite(m_digitalMappedTempProbePin, LOW);
-  m_paused = false;
   m_readCount = 0;
   m_candidateTempProbeReading = 0;
   m_tempProbeReading = 0;
@@ -26,9 +25,6 @@ TempProbe::TempProbe(int tempProbePin)
 
 void TempProbe::read()
 {
-  if (m_paused) {
-    return;
-  }
   int sensorReading = analogRead(m_tempProbePin);
   #ifdef DEBUG_HW
     Serial.print(F("TempSensor: "));
@@ -102,16 +98,6 @@ int TempProbe::tempFInt()
 int TempProbe::tempCInt()
 {
   return (int) m_tempC;
-}
-
-void TempProbe::pause()
-{
-  m_paused = true;
-}
-
-void TempProbe::unpause()
-{
-  m_paused = false;
 }
 
 void TempProbe::prime()

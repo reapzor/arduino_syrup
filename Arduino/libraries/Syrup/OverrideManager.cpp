@@ -9,7 +9,8 @@ OverrideManager::OverrideManager(ToggleButton *toggleButton,
 }
 OverrideManager::~OverrideManager()
 {
-  unregisterObservers();
+  //unregisterObservers();
+  //Since it never dies anyway
 }
 
 

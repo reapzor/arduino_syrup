@@ -115,8 +115,6 @@ class SyrupDisplayManager : public Observer<TempProbe>, public Observer<ValveCon
   private:
     bool m_shouldDraw;
     bool m_prepForTransition;
-    void appendDurationStringLeftOriented(char* string, unsigned long time);
-    void appendDurationStringRightOriented(char* string, unsigned long time);
     void appendDurationString(char* string, unsigned long time, bool rightOriented);
     void appendTempString(char* string, float temp);
     void appendTempStringMain(char* string);

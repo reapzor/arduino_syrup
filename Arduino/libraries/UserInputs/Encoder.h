@@ -22,12 +22,9 @@ class Encoder : public Subject<Encoder>
     int m_directionPin;
     e_direction m_direction;
     void read();
-    void pause();
-    void unpause();
     void prime();
     void tick();
   private:
-    bool m_paused;
     long m_delayTime;
     static const int READ_DELAY = 1;
 };

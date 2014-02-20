@@ -12,7 +12,8 @@ TempValveManager::TempValveManager(TempProbe *tempProbe, ValveController *valveC
 }
 TempValveManager::~TempValveManager()
 {
-  unregisterObservers();
+  //unregisterObservers();
+  //Since it never dies
 }
 
 void TempValveManager::registerObservers()

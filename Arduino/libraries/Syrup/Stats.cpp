@@ -11,7 +11,8 @@ Stats::Stats(ValveController *valveController, TempProbe *tempProbe) :
 
 Stats::~Stats()
 {
-  unregisterObservers();
+ //unregisterObservers();
+ //Since it never dies
 }
 
 void Stats::reset()

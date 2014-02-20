@@ -195,7 +195,7 @@ void SyrupDisplayManager::update(Stats *stats)
         case MAIN:
             char row2Time[8];
             *row2Time = LCDController::NULL_TERMINATOR;
-            appendDurationStringRightOriented(row2Time, stats->m_currentDuration);
+            appendDurationString(row2Time, stats->m_currentDuration, true);
             m_pLCD->edit(1, 17, row2Time);
             break;
       }
@@ -440,7 +440,7 @@ void SyrupDisplayManager::drawMain()
   m_pLCD->write(1, row);
   
   *row = LCDController::NULL_TERMINATOR;
-  appendDurationStringRightOriented(row, m_pStats->m_currentDuration);
+  appendDurationString(row, m_pStats->m_currentDuration, true);
   m_pLCD->edit(1, 17, row);
 }
 
@@ -457,13 +457,7 @@ void SyrupDisplayManager::appendTempStringMain(char *string)
 {
   int charLength = 7;
   char tempStr[8];
-  if (m_pTempProbe->m_tempProbeReading == 0) {
-    strcpy(tempStr, s_calculating);
-    strcat(tempStr, s_period);
-    strcat(tempStr, s_period);
-    strcat(tempStr, s_period);
-  }
-  else {
+  if (m_pTempProbe->m_tempProbeReading != 0) {
     switch(m_pSettingsManager->m_settings.m_tempScale)
     {
       case TempProbe::FAHRENHEIT:
@@ -475,6 +469,12 @@ void SyrupDisplayManager::appendTempStringMain(char *string)
         strcat(tempStr, s_tempDegreeC);
         break;
     }
+  }
+  else {
+    strcpy(tempStr, s_calculating);
+    strcat(tempStr, s_period);
+    strcat(tempStr, s_period);
+    strcat(tempStr, s_period);
   }
   strcat(string, tempStr);
   appendSpaces(string, charLength, tempStr);
@@ -509,16 +509,6 @@ void SyrupDisplayManager::appendValveStateString(char* string)
   }
 }
 
-void SyrupDisplayManager::appendDurationStringLeftOriented(char* string, unsigned long time)
-{
-  appendDurationString(string, time, false);
-}
-
-void SyrupDisplayManager::appendDurationStringRightOriented(char* string, unsigned long time)
-{
-  appendDurationString(string, time, true);
-}
-
 void SyrupDisplayManager::appendDurationString(char* string, unsigned long time,
   bool rightOriented)
 {
@@ -549,12 +539,7 @@ void SyrupDisplayManager::appendDurationString(char* string, unsigned long time,
     minutes++;
   }
   seconds = time;
-  if (days >= 100) {
-    itoa(days, timePart, integerBase);
-    strcat(durationStr, timePart);
-    strcat(durationStr, s_daysChar);
-  }
-  else {
+  if (days < 100) {
     if (days > 0) {
       itoa(days, timePart, integerBase);
       strcat(durationStr, timePart);
@@ -601,6 +586,11 @@ void SyrupDisplayManager::appendDurationString(char* string, unsigned long time,
         strcat(durationStr, s_secondsChar);
       }
     }
+  }
+  else {
+    itoa(days, timePart, integerBase);
+    strcat(durationStr, timePart);
+    strcat(durationStr, s_daysChar);
   }
   if (rightOriented) {
     appendSpaces(string, charLength, durationStr);

@@ -27,8 +27,6 @@ class TempProbe : public Subject<TempProbe>
     void read();
     int tempFInt();
     int tempCInt();
-    void pause();
-    void unpause();
     void prime();
     void tick();
     float convertReadingToF(int tempProbeReading);
@@ -36,7 +34,6 @@ class TempProbe : public Subject<TempProbe>
     float convertReadingToC(int tempProbeReading);
     
   private:
-    bool m_paused;
     int m_readCount;
     long m_candidateTempProbeReading;
     long m_delayTime;

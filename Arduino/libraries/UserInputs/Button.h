@@ -23,7 +23,6 @@ class Button : public Subject<T>
       m_triggerPin = triggerPin;
       pinMode(m_triggerPin, INPUT_PULLUP);
       m_buttonState = UNDEF;
-      m_paused = false;
     }
     
     ~Button() {}
@@ -32,9 +31,6 @@ class Button : public Subject<T>
     
     void read()
     {
-      if (m_paused) {
-        return;
-      }
       //triggerPin: Low = ON/DEPRESSED | High = OFF/RELEASED
       //Since we use pullup, the button needs to lead to ground.
       int triggerPinValue = digitalRead(m_triggerPin);
@@ -66,16 +62,6 @@ class Button : public Subject<T>
       }
     }
     
-    void pause()
-    {
-      m_paused = true;
-    }
-    
-    void unpause()
-    {
-      m_paused = false;
-    }
-    
     void prime()
     {
       m_delayTime = (long)millis();
@@ -90,7 +76,6 @@ class Button : public Subject<T>
     }
     
   private:
-    bool m_paused;
     long m_delayTime;
     static const int READ_DELAY = 7;
     

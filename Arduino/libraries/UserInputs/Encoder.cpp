@@ -9,15 +9,11 @@ Encoder::Encoder(int triggerPin, int directionPin)
   pinMode(triggerPin, INPUT_PULLUP);
   pinMode(directionPin, INPUT_PULLUP);
   m_direction = UNDEF;
-  m_paused = false;
   m_delayTime = 0;
 }
 
 void Encoder::read()
 {
-  if (m_paused) {
-    return;
-  }
   int triggerPinValue = digitalRead(m_triggerPin);
   int directionPinValue = digitalRead(m_directionPin);
   //triggerPin - 0 = trigger hit. 1 = reset
@@ -69,16 +65,6 @@ void Encoder::read()
       notify();
     }
   }
-}
-
-void Encoder::pause()
-{
-  m_paused = true;
-}
-
-void Encoder::unpause()
-{
-  m_paused = false;
 }
 
 void Encoder::prime()
