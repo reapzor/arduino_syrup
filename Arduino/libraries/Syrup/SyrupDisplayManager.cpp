@@ -287,6 +287,7 @@ void SyrupDisplayManager::tick()
         m_pTHRESEditor = new THRESEditor(m_pSettingsManager, m_pEncoder, m_pToggleButton);
         m_pTHRESEditor->attach(this);
         m_pTHRESEditor->enterEditMode();
+        m_editModeBlinkTime = (long)millis();
       }
     }
   }
