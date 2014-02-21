@@ -140,7 +140,7 @@ void Stats::tick()
     setNextMinute();
     m_uptime++;
     #ifdef DEV
-      Serial.print(F("Uptime: "));
+      Serial.print(F("Up: "));
       Serial.println(m_uptime);
     #endif
     sendNotify(UPTIME, false);    
@@ -152,7 +152,7 @@ void Stats::updateFreeMem()
 {
   m_freeMem = freeMemory();
   #ifdef DEV
-    Serial.print(F("Free Mem: "));
+    Serial.print(F("Free: "));
     Serial.println(m_freeMem);
   #endif
   sendNotify(FREE_MEM);

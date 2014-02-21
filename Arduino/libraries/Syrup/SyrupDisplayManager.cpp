@@ -96,14 +96,15 @@ void SyrupDisplayManager::setState(e_displayState state)
 {
   if (m_transitioning) {
     #ifdef DEBUG
-      Serial.println(F("TRANSITIONING!"));
+      Serial.print(F("TRANS: "));
+      Serial.println(state);
     #endif
     m_nextTransition = state;
     return;
   }
   if (m_displayState == state) {
     #ifdef DEBUG
-      Serial.print(F("ALREADY SET STATE: "));
+      Serial.print(F("DUPE: "));
       Serial.println(state);
     #endif
     return;
@@ -240,7 +241,7 @@ void SyrupDisplayManager::update(ToggleButton *toggleButton)
 
 void SyrupDisplayManager::update(TempValveManager *tempValveManager)
 {
-  Serial.println(tempValveManager->m_thresholdRegion);
+  //Serial.println(tempValveManager->m_thresholdRegion);
 }
 
 void SyrupDisplayManager::update(OverrideManager *overrideManager)
@@ -522,7 +523,7 @@ void SyrupDisplayManager::appendDurationString(char* string, unsigned long time,
   bool rightOriented)
 {
   int charLength = 7;
-  int dayTime = 86400;
+  long dayTime = 86400;
   int hourTime = 3600;
   int minuteTime = 60;
   int integerBase = 10;
