@@ -61,7 +61,7 @@ char* SyrupDisplayManager::s_duration = "DUR";
 
 char* SyrupDisplayManager::s_daysChar = "D";
 char* SyrupDisplayManager::s_hoursChar = "H";
-char* SyrupDisplayManager::s_minutesChar = "M";
+char* SyrupDisplayManager::s_minutesChar = "m";
 char* SyrupDisplayManager::s_secondsChar = "s";
 char* SyrupDisplayManager::s_zeroChar = "0";
 
@@ -228,6 +228,24 @@ void SyrupDisplayManager::update(Stats *stats)
         *durationString = LCDController::NULL_TERMINATOR;
         appendDurationString(durationString, m_pStats->m_lastDurationOpen, false, true);
         m_pLCD->edit(0, 15, durationString);
+      }
+      break;
+    case Stats::AVERAGE_DURATION_OPEN:
+      if (m_displayState == AVERAGE_DUR) {
+        char durationString[7];
+        *durationString = LCDController::NULL_TERMINATOR;
+        appendDurationString(durationString, m_pStats->m_averageDurationOpen, false, true);
+        m_pLCD->edit(0, 14, durationString);
+      
+      }
+      break;
+    case Stats::AVERAGE_DURATION_CLOSED:
+      if (m_displayState == AVERAGE_DUR) {
+        char durationString[7];
+        *durationString = LCDController::NULL_TERMINATOR;
+        appendDurationString(durationString, m_pStats->m_averageDurationClosed, false, true);
+        m_pLCD->edit(1, 16, durationString);
+      
       }
       break;
     case Stats::RESET:
@@ -413,7 +431,10 @@ void SyrupDisplayManager::draw()
       drawSettingCanceled();
       break;
     case LAST_DUR:
-      drawDuration();
+      drawDuration(false);
+      break;
+    case AVERAGE_DUR:
+      drawDuration(true);
       break;
     default:
       m_pLCD->clear();
@@ -422,10 +443,16 @@ void SyrupDisplayManager::draw()
   }
 }
 
-void SyrupDisplayManager::drawDuration()
+
+void SyrupDisplayManager::drawDuration(bool useAverage)
 {
   char durationString[17];
-  strcpy(durationString, s_last);
+  if (useAverage) {
+    strcpy(durationString, s_average);
+  }
+  else {
+    strcpy(durationString, s_last);
+  }
   strcat(durationString, s_space);
   strcat(durationString, s_duration);
   strcat(durationString, s_space);
@@ -433,7 +460,12 @@ void SyrupDisplayManager::drawDuration()
   strcat(durationString, s_colon);
   m_pLCD->write(0, durationString);
   
-  strcpy(durationString, s_last);
+  if (useAverage) {
+    strcpy(durationString, s_average);
+  }
+  else {
+    strcpy(durationString, s_last);
+  }
   strcat(durationString, s_space);
   strcat(durationString, s_duration);
   strcat(durationString, s_space);
@@ -441,14 +473,30 @@ void SyrupDisplayManager::drawDuration()
   strcat(durationString, s_colon);
   m_pLCD->write(1, durationString);
   
-  *durationString = LCDController::NULL_TERMINATOR;
-  appendDurationString(durationString, m_pStats->m_lastDurationOpen, false, true);
-  m_pLCD->edit(0, 15, durationString);
+  int offsetLine1;
+  int offsetLine2;
+  unsigned long durOpen;
+  unsigned long durClosed;
+  if (useAverage) {
+    offsetLine1 = 14;
+    offsetLine2 = 16;
+    durOpen = m_pStats->m_averageDurationOpen;
+    durClosed = m_pStats->m_lastDurationClosed;
+  }
+  else {
+    offsetLine1 = 15;
+    offsetLine2 = 17;
+    durOpen = m_pStats->m_lastDurationOpen;
+    durClosed = m_pStats->m_lastDurationClosed;  
+  }
   
   *durationString = LCDController::NULL_TERMINATOR;
-  appendDurationString(durationString, m_pStats->m_lastDurationClosed, false, true);
-  m_pLCD->edit(1, 17, durationString);
+  appendDurationString(durationString, durOpen, false, true);
+  m_pLCD->edit(0, offsetLine1, durationString);
   
+  *durationString = LCDController::NULL_TERMINATOR;
+  appendDurationString(durationString, durClosed, false, true);
+  m_pLCD->edit(1, offsetLine2, durationString);
 }
 
 void SyrupDisplayManager::drawSettingSaved()

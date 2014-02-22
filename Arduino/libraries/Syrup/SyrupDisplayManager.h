@@ -156,7 +156,7 @@ class SyrupDisplayManager : public Observer<TempProbe>, public Observer<ValveCon
     void drawThres();
     void drawSettingSaved();
     void drawSettingCanceled();
-    void drawDuration();
+    void drawDuration(bool useAverage);
     
     void cancelThresEditMode();
     void editModeBlinkDraw(int row, int offset);

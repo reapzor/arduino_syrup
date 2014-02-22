@@ -23,6 +23,7 @@ void Stats::reset()
   m_tempMin = 1023; // :(
   m_tempMax = 0;
   m_lastDurationClosed = 0;
+  m_lastDurationOpen = 0;
   m_averageDurationClosed = 0;
   m_averageDurationOpen = 0;
   m_countClosed = 0;
@@ -31,7 +32,7 @@ void Stats::reset()
   m_nextSecond = 0;
   resetNextSecond();
   resetNextMinute();
-  sendNotify(RESET, true);
+  sendNotify(RESET);
 }
 
 void Stats::registerObservers()
@@ -62,8 +63,13 @@ void Stats::update(ValveController *valve)
       m_currentDuration = 0;
       resetNextSecond();
       sendNotify(CURRENT_DURATION, false);
-      m_averageDurationClosed = ((m_averageDurationClosed * (m_countClosed-1))
-        + m_lastDurationClosed) / m_countClosed;
+      if (m_countClosed == 0) {
+        m_averageDurationClosed = m_lastDurationClosed;
+      }
+      else {
+        m_averageDurationClosed = ((m_averageDurationClosed * (m_countClosed-1))
+          + m_lastDurationClosed) / m_countClosed;
+      }
       sendNotify(AVERAGE_DURATION_CLOSED);
       break;
     case ValveController::CLOSED:
@@ -78,8 +84,13 @@ void Stats::update(ValveController *valve)
       m_currentDuration = 0;
       resetNextSecond();
       sendNotify(CURRENT_DURATION, false);
-      m_averageDurationOpen = ((m_averageDurationOpen * (m_countOpen-1))
-        + m_lastDurationOpen) / m_countOpen;
+      if (m_countOpen == 0) {
+        m_averageDurationOpen = m_lastDurationOpen;
+      }
+      else {
+        m_averageDurationOpen = ((m_averageDurationOpen * (m_countOpen-1))
+          + m_lastDurationOpen) / m_countOpen;
+      }
       sendNotify(AVERAGE_DURATION_OPEN);
       break;
   }
