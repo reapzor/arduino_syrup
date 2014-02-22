@@ -63,6 +63,7 @@ void TempValveManager::updateThreshold(float temp, float boundsThreshold)
       Serial.println(F("TVM: UPPER"));
     #endif
     tryUpperBoundsTask();
+    notify();
     if (m_taskRun != NO_TASK) {
       m_taskRun = NO_TASK;
     }    
