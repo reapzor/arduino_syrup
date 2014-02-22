@@ -7,6 +7,9 @@ Stats::Stats(ValveController *valveController, TempProbe *tempProbe) :
     Subject<Stats>(), Observer<ValveController>(), Observer<TempProbe>()
 {
   reset();
+  m_uptime = 0;
+  m_freeMem = 0;
+  m_currentDuration = 0;
 }
 
 Stats::~Stats()
@@ -17,18 +20,18 @@ Stats::~Stats()
 
 void Stats::reset()
 {
-  m_tempMin = 32767; // :(
+  m_tempMin = 1023; // :(
   m_tempMax = 0;
-  m_currentDuration = 0;
   m_lastDurationClosed = 0;
   m_averageDurationClosed = 0;
   m_averageDurationOpen = 0;
   m_countClosed = 0;
   m_countOpen = 0;
-  m_uptime = 0;
-  m_freeMem = 0;
   m_nextMinute = 0;
   m_nextSecond = 0;
+  resetNextSecond();
+  resetNextMinute();
+  sendNotify(RESET, true);
 }
 
 void Stats::registerObservers()

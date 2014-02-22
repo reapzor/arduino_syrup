@@ -19,6 +19,7 @@ class Stats : public Subject<Stats>, public Observer<ValveController>,
     enum e_statsValues
     {
       IDLE,
+      RESET,
       TEMP_MIN,
       TEMP_MAX,
       CURRENT_DURATION,

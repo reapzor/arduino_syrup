@@ -68,6 +68,7 @@ class SyrupDisplayManager : public Observer<TempProbe>, public Observer<ValveCon
     
     static char* s_daysChar;
     static char* s_hoursChar;
+    static char* s_minutesChar;
     static char* s_zeroChar;
     static char* s_secondsChar;
     
@@ -117,7 +118,8 @@ class SyrupDisplayManager : public Observer<TempProbe>, public Observer<ValveCon
   private:
     bool m_shouldDraw;
     bool m_prepForTransition;
-    void appendDurationString(char* string, unsigned long time, bool rightOriented);
+    void appendDurationString(char* string, unsigned long time, 
+        bool rightOriented, bool useMinuteDisplay);
     void appendTempString(char* string, float temp);
     void appendTempStringMain(char* string);
     void appendValveStateString(char* string);
@@ -147,12 +149,15 @@ class SyrupDisplayManager : public Observer<TempProbe>, public Observer<ValveCon
     bool m_transitioning;
     e_displayState m_nextTransition;
     long m_currentTransitionDelay;
+    void shouldDraw();
     void drawWelcome();
     void drawMain();
     void drawValveOverride();
     void drawThres();
     void drawSettingSaved();
     void drawSettingCanceled();
+    void drawDuration();
+    
     void cancelThresEditMode();
     void editModeBlinkDraw(int row, int offset);
     long m_toggleButtonHoldDelay;
@@ -162,6 +167,7 @@ class SyrupDisplayManager : public Observer<TempProbe>, public Observer<ValveCon
     int m_editModeBlinkRow;
     int m_editModeBlinkOffset;
     int m_toggleButtonPressCount;
+    int m_currentDrawDelay;
 
 };
     
