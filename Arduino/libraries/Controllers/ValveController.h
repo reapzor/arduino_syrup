@@ -18,7 +18,7 @@ class ValveController : public Subject<ValveController>
     };
     int m_valveSignalPin;
     e_valveState m_valveState;
-    bool m_stateIsForced;
+    bool m_isStateForced;
     void openValve();
     void forceOpenValve();
     void closeValve();
@@ -32,6 +32,7 @@ class ValveController : public Subject<ValveController>
   private:
     e_valveState m_suggestedState;
     long m_delayTime;
+    bool m_stateIsForced;
     static const int STATE_CHANGE_DELAY = 1000;
     bool delayExpired();
     void resetDelay();

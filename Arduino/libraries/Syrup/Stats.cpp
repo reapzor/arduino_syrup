@@ -49,6 +49,9 @@ void Stats::unregisterObservers()
 
 void Stats::update(ValveController *valve)
 {
+  if (valve->m_isStateForced) {
+    return;
+  }
   switch(valve->m_valveState)
   {
     case ValveController::OPEN:
@@ -64,7 +67,7 @@ void Stats::update(ValveController *valve)
       resetNextSecond();
       sendNotify(CURRENT_DURATION, false);
       if (m_countClosed == 0) {
-        m_averageDurationClosed = m_lastDurationClosed;
+        m_averageDurationClosed = 0;
       }
       else {
         m_averageDurationClosed = ((m_averageDurationClosed * (m_countClosed-1))
@@ -85,7 +88,7 @@ void Stats::update(ValveController *valve)
       resetNextSecond();
       sendNotify(CURRENT_DURATION, false);
       if (m_countOpen == 0) {
-        m_averageDurationOpen = m_lastDurationOpen;
+        m_averageDurationOpen = 0;
       }
       else {
         m_averageDurationOpen = ((m_averageDurationOpen * (m_countOpen-1))

@@ -10,6 +10,7 @@ ValveController::ValveController(int valvePin)
   digitalWrite(m_valveSignalPin, LOW);
   m_valveState = CLOSED;
   m_stateIsForced = false;
+  m_isStateForced = false;
 }
 
 void ValveController::openValve()
@@ -63,6 +64,7 @@ void ValveController::releaseForcedState()
   m_stateIsForced = false;
   forceExpireDelay();
   changeValveToSuggestedState();
+  m_isStateForced = false;
 }
 
 void ValveController::changeValveState(bool ignoreDelay, e_valveState state)
@@ -100,6 +102,7 @@ void ValveController::changeValveState(bool ignoreDelay, e_valveState state)
       m_suggestedState = m_valveState;
     }
     m_stateIsForced = true;
+    m_isStateForced = true;
   }  
   if (m_valveState != state) {
     m_valveState = state;    
