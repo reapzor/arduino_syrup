@@ -210,7 +210,7 @@ void SyrupDisplayManager::update(Stats *stats)
       if (m_displayState == MAIN) {
         char row2Time[8];
         *row2Time = LCDController::NULL_TERMINATOR;
-        appendDurationString(row2Time, stats->m_currentDuration, true, false);
+        appendDurationString(row2Time, stats->m_currentDuration, true, true);
         m_pLCD->edit(1, 17, row2Time);
         break;
       }
@@ -218,7 +218,7 @@ void SyrupDisplayManager::update(Stats *stats)
       if (m_displayState == LAST_DUR){
         char durationString[7];
         *durationString = LCDController::NULL_TERMINATOR;
-        appendDurationString(durationString, m_pStats->m_lastDurationClosed, false, true);
+        appendDurationString(durationString, m_pStats->m_lastDurationClosed, false, false);
         m_pLCD->edit(1, 17, durationString);
       }
       break;
@@ -226,7 +226,7 @@ void SyrupDisplayManager::update(Stats *stats)
       if (m_displayState == LAST_DUR){
         char durationString[7];
         *durationString = LCDController::NULL_TERMINATOR;
-        appendDurationString(durationString, m_pStats->m_lastDurationOpen, false, true);
+        appendDurationString(durationString, m_pStats->m_lastDurationOpen, false, false);
         m_pLCD->edit(0, 15, durationString);
       }
       break;
@@ -234,7 +234,7 @@ void SyrupDisplayManager::update(Stats *stats)
       if (m_displayState == AVERAGE_DUR) {
         char durationString[7];
         *durationString = LCDController::NULL_TERMINATOR;
-        appendDurationString(durationString, m_pStats->m_averageDurationOpen, false, true);
+        appendDurationString(durationString, m_pStats->m_averageDurationOpen, false, false);
         m_pLCD->edit(0, 14, durationString);
       
       }
@@ -243,7 +243,7 @@ void SyrupDisplayManager::update(Stats *stats)
       if (m_displayState == AVERAGE_DUR) {
         char durationString[7];
         *durationString = LCDController::NULL_TERMINATOR;
-        appendDurationString(durationString, m_pStats->m_averageDurationClosed, false, true);
+        appendDurationString(durationString, m_pStats->m_averageDurationClosed, false, false);
         m_pLCD->edit(1, 16, durationString);
       
       }
@@ -491,11 +491,11 @@ void SyrupDisplayManager::drawDuration(bool useAverage)
   }
   
   *durationString = LCDController::NULL_TERMINATOR;
-  appendDurationString(durationString, durOpen, false, true);
+  appendDurationString(durationString, durOpen, false, false);
   m_pLCD->edit(0, offsetLine1, durationString);
   
   *durationString = LCDController::NULL_TERMINATOR;
-  appendDurationString(durationString, durClosed, false, true);
+  appendDurationString(durationString, durClosed, false, false);
   m_pLCD->edit(1, offsetLine2, durationString);
 }
 
@@ -579,7 +579,7 @@ void SyrupDisplayManager::drawMain()
   m_pLCD->write(1, row);
   
   *row = LCDController::NULL_TERMINATOR;
-  appendDurationString(row, m_pStats->m_currentDuration, true, false);
+  appendDurationString(row, m_pStats->m_currentDuration, true, true);
   m_pLCD->edit(1, 17, row);
 }
 
@@ -656,7 +656,7 @@ void SyrupDisplayManager::appendValveStateString(char* string)
 }
 
 void SyrupDisplayManager::appendDurationString(char* string, unsigned long time,
-  bool rightOriented, bool useMinuteDisplay)
+  bool rightOriented, bool animate)
 {
   int charLength = 7;
   long dayTime = 86400;
@@ -703,40 +703,36 @@ void SyrupDisplayManager::appendDurationString(char* string, unsigned long time,
         strcat(durationStr, s_hoursChar);
       }
       else {
-        if (seconds % 2 > 0) {
-          strcat(durationStr, s_colon);
+        if (animate) {
+          if (seconds % 2 > 0) {
+            strcat(durationStr, s_colon);
+          }
+          else {
+            strcat(durationStr, s_space);
+          }
         }
         else {
+          strcat(durationStr, s_hoursChar);
           strcat(durationStr, s_space);
         }
       }
       ignoreSeconds = true;
     }
     if (!ignoreMinutes && (minutes > 0 || hours > 0)) {
-      if (minutes < 10) {
+      if (minutes < 10 && ignoreSeconds) {
         strcat(durationStr, s_zeroChar);
       }
       itoa(minutes, timePart, integerBase);
       strcat(durationStr, timePart);
       if (!ignoreSeconds) {
-        if (useMinuteDisplay) {
-          strcat(durationStr, s_minutesChar);
-          strcat(durationStr, s_space);
-        }
-        else {
-          strcat(durationStr, s_colon);
-        }
+        strcat(durationStr, s_minutesChar);
+        strcat(durationStr, s_space);
       }
     }
     if (!ignoreSeconds) {
-      if (seconds < 10) {
-        strcat(durationStr, s_zeroChar);
-      }
       itoa(seconds, timePart, integerBase);
       strcat(durationStr, timePart);
-      if (minutes == 0 || useMinuteDisplay) {
-        strcat(durationStr, s_secondsChar);
-      }
+      strcat(durationStr, s_secondsChar);
     }
   }
   else {
