@@ -51,8 +51,8 @@ class TempValveManager : public Observer<TempProbe>, public Subject<TempValveMan
     SyrupSettingsManager *m_pSettingsManager;
     void updateThreshold(float temp, float boundsThreshold);
     bool m_taskSwitch;
-    bool tryUpperBoundsTask();
-    bool tryLowerBoundsTask();
+    void tryUpperBoundsTask();
+    void tryLowerBoundsTask();
     void doUpperBoundsTask();
     void doLowerBoundsTask();
 };

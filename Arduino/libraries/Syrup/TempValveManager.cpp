@@ -51,6 +51,9 @@ void TempValveManager::updateThreshold(float temp, float boundsThreshold)
     #endif
     tryUpperBoundsTask();
     notify();
+    if (m_taskRun != NO_TASK) {
+      m_taskRun = NO_TASK;
+    }
     return;
   }
   if (temp >= upperThreshold && temp < (upperThreshold + boundsThreshold)
@@ -60,7 +63,9 @@ void TempValveManager::updateThreshold(float temp, float boundsThreshold)
       Serial.println(F("TVM: UPPER"));
     #endif
     tryUpperBoundsTask();
-    notify();
+    if (m_taskRun != NO_TASK) {
+      m_taskRun = NO_TASK;
+    }    
     return;
   }
   if (temp <= (upperThreshold - boundsThreshold) && m_thresholdRegion >= UPPER
@@ -87,8 +92,10 @@ void TempValveManager::updateThreshold(float temp, float boundsThreshold)
     #ifdef DEBUG_THRES
       Serial.println(F("TVM: LOWER"));
     #endif
-    if (!tryLowerBoundsTask()) {
-      notify();
+    tryLowerBoundsTask();
+    notify();
+    if (m_taskRun != NO_TASK) {
+      m_taskRun = NO_TASK;
     }
     return;
   }
@@ -97,29 +104,29 @@ void TempValveManager::updateThreshold(float temp, float boundsThreshold)
     #ifdef DEBUG_THRES
       Serial.println(F("TVM: BELOW"));
     #endif
-    if (!tryLowerBoundsTask()) {
-      notify();
+    tryLowerBoundsTask();
+    notify();
+    if (m_taskRun != NO_TASK) {
+      m_taskRun = NO_TASK;
     }
     return;
   }
 }
 
-bool TempValveManager::tryUpperBoundsTask()
+void TempValveManager::tryUpperBoundsTask()
 {
   if (!m_taskSwitch) {
     doUpperBoundsTask();
     m_taskSwitch = true;
   }
-  return m_taskSwitch;
 }
 
-bool TempValveManager::tryLowerBoundsTask()
+void TempValveManager::tryLowerBoundsTask()
 {
   if (m_taskSwitch) {
     doLowerBoundsTask();
     m_taskSwitch = false;
   }
-  return !m_taskSwitch;
 }
 
 void TempValveManager::doUpperBoundsTask()
@@ -129,8 +136,6 @@ void TempValveManager::doUpperBoundsTask()
   #endif
   m_pValveController->openValve();
   m_taskRun = UPPER_TASK;
-  notify();
-  m_taskRun = NO_TASK;
 }
 
 void TempValveManager::doLowerBoundsTask()
@@ -140,7 +145,5 @@ void TempValveManager::doLowerBoundsTask()
   #endif
   m_pValveController->closeValve();
   m_taskRun = LOWER_TASK;
-  notify();
-  m_taskRun = NO_TASK;
 }
 
