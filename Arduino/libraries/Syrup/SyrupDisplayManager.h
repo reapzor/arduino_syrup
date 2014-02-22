@@ -113,7 +113,6 @@ class SyrupDisplayManager : public Observer<TempProbe>, public Observer<ValveCon
       ValveController *valve, Stats *stats, OverrideManager *overrideManager,
       ToggleButton *toggleButton, SyrupSettingsManager *settingsManager,
       Encoder *encoder, TempValveManager *tempValveManager);
-    ~SyrupDisplayManager();
   
   private:
     bool m_shouldDraw;

@@ -11,11 +11,6 @@ TempValveManager::TempValveManager(TempProbe *tempProbe, ValveController *valveC
   m_taskSwitch = false;
   m_taskRun = NO_TASK;
 }
-TempValveManager::~TempValveManager()
-{
-  //unregisterObservers();
-  //Since it never dies
-}
 
 void TempValveManager::registerObservers()
 {

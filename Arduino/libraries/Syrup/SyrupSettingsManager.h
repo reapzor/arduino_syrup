@@ -16,7 +16,6 @@ class SyrupSettingsManager
 {
   public:
     SyrupSettingsManager();
-    ~SyrupSettingsManager();
     struct SyrupSettings
     {
       bool operator==(const SyrupSettings& s)

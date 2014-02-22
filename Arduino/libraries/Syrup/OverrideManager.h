@@ -19,7 +19,6 @@ class OverrideManager : public Subject<OverrideManager>, Observer<ToggleButton>,
   public:
     OverrideManager(ToggleButton *toggleButton, OverrideSwitch *overrideSwitch,
       ValveController *valveController);
-    ~OverrideManager();
     void registerObservers();
     void unregisterObservers();
     bool isValveOverrideEnabled();

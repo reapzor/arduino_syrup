@@ -11,10 +11,6 @@ SyrupSettingsManager::SyrupSettingsManager()
   m_isUseless = false;
 }
 
-SyrupSettingsManager::~SyrupSettingsManager()
-{
-}
-
 void SyrupSettingsManager::save()
 {
   if (m_isUseless) {

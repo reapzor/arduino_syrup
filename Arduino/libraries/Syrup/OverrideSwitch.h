@@ -13,7 +13,6 @@ class OverrideSwitch : public Button<OverrideSwitch>
 {
   public:
     OverrideSwitch(int pin) : Button<OverrideSwitch>(pin) {}
-    ~OverrideSwitch() {}
     
 };
 

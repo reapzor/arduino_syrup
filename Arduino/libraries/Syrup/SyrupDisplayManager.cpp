@@ -30,12 +30,6 @@ SyrupDisplayManager::SyrupDisplayManager(LCDController *lcd,
   m_editModeBlinkOffset = 0;
 }
 
-SyrupDisplayManager::~SyrupDisplayManager()
-{
-  //cancelThresEditMode();
-  //We will never die, and we want to save 100 bytes of progmem...
-}
-
 char* SyrupDisplayManager::s_welcomeLineOne = "THE SYRUP-O-MATIC  V1.0";
 char* SyrupDisplayManager::s_welcomeLineTwo = "CREATED BY CHUCK BENSON";
 

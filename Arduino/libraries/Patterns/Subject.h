@@ -12,8 +12,6 @@ class Subject
 {
   public:
     typedef typename std::vector<Observer<T> *>::iterator t_iterator;
-    Subject() {}
-    ~Subject() {}
     void attach(Observer<T> *observer)
     {
       m_observers.push_back(observer);
@@ -32,7 +30,7 @@ class Subject
     {
       t_iterator it;
       for (it = m_observers.begin(); it != m_observers.end(); it++) {
-        (*it)->update(static_cast<T *>(this));
+        (*it)->update((T *) this);
       }
     }
   private:

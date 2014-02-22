@@ -7,8 +7,8 @@
 //#define DEBUG_HW
 //#define DEBUG
 
-template <class T>
-class Button : public Subject<T>
+template <class V>
+class Button : public Subject<V>
 {
   public:
     enum e_buttonState
@@ -18,7 +18,7 @@ class Button : public Subject<T>
       OFF
     };
     
-    Button(int triggerPin) : Subject<T>()
+    Button(int triggerPin) : Subject<V>()
     {
       m_triggerPin = triggerPin;
       pinMode(m_triggerPin, INPUT_PULLUP);

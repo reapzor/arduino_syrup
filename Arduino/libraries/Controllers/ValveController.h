@@ -28,7 +28,7 @@ class ValveController : public Subject<ValveController>
     void releaseForcedState();
     void tick();
     ValveController(int valvePin);
-    ~ValveController() {}
+    
   private:
     e_valveState m_suggestedState;
     long m_delayTime;

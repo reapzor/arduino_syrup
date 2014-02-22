@@ -7,12 +7,6 @@ OverrideManager::OverrideManager(ToggleButton *toggleButton,
     m_pValveController(valveController), Subject<OverrideManager>()
 {
 }
-OverrideManager::~OverrideManager()
-{
-  //unregisterObservers();
-  //Since it never dies anyway
-}
-
 
 void OverrideManager::registerObservers()
 {

@@ -12,12 +12,6 @@ Stats::Stats(TempValveManager *tempValveManager, TempProbe *tempProbe) :
   m_currentDuration = 0;
 }
 
-Stats::~Stats()
-{
- //unregisterObservers();
- //Since it never dies
-}
-
 void Stats::reset()
 {
   m_tempMin = 1023; // :(

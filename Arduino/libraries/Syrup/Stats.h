@@ -57,7 +57,6 @@ class Stats : public Subject<Stats>, public Observer<TempValveManager>,
     void reset();
     
     Stats(TempValveManager *tempValveManager, TempProbe *tempProbe);
-    ~Stats();
     
   private:
     static const int ONE_SECOND = 1000;

@@ -13,7 +13,6 @@ class ToggleButton : public Button<ToggleButton>
 {
   public:
     ToggleButton(int pin) : Button<ToggleButton>(pin) {}
-    ~ToggleButton() {}
     
 };
 

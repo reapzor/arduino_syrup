@@ -34,7 +34,7 @@ class TempValveManager : public Observer<TempProbe>, public Subject<TempValveMan
     };
     TempValveManager(TempProbe *tempProbe, ValveController *valveController,
       SyrupSettingsManager *settingsManager);
-    ~TempValveManager();
+      
     e_thresholdRegion m_thresholdRegion;
     e_taskRun m_taskRun;
     static const int BOUNDS_THRESHOLD_F = 1;
