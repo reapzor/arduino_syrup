@@ -43,7 +43,7 @@ char* SyrupDisplayManager::s_mainTemp = "Temp";
 char* SyrupDisplayManager::s_mainValve = "Valve";
 char* SyrupDisplayManager::s_mainTime = "Time";
 
-char* SyrupDisplayManager::s_calculating = "CALC";
+char* SyrupDisplayManager::s_calculating = "CALC...";
 char* SyrupDisplayManager::s_period = ".";
 
 char* SyrupDisplayManager::s_tempDegreeF = "F";
@@ -212,8 +212,8 @@ void SyrupDisplayManager::update(Stats *stats)
         *row2Time = LCDController::NULL_TERMINATOR;
         appendDurationString(row2Time, stats->m_currentDuration, true, true);
         m_pLCD->edit(1, 17, row2Time);
-        break;
       }
+      break;
     case Stats::LAST_DURATION_CLOSED:
       if (m_displayState == LAST_DUR){
         char durationString[7];
@@ -236,7 +236,6 @@ void SyrupDisplayManager::update(Stats *stats)
         *durationString = LCDController::NULL_TERMINATOR;
         appendDurationString(durationString, m_pStats->m_averageDurationOpen, false, false);
         m_pLCD->edit(0, 14, durationString);
-      
       }
       break;
     case Stats::AVERAGE_DURATION_CLOSED:
@@ -385,23 +384,6 @@ void SyrupDisplayManager::tick()
 ###  DRAWING  ###
 #################
 */
-void SyrupDisplayManager::editModeBlinkDraw(int row, int offset)
-{
-  if (m_editModeBlinkOn) {
-    if (m_editModeBlinkRow != row || m_editModeBlinkOffset != offset) {
-      m_pLCD->edit(m_editModeBlinkRow, m_editModeBlinkOffset, s_colon);
-    }
-    m_editModeBlinkOn = false;
-    m_pLCD->edit(row, offset, s_colon);
-  }
-  else {
-    m_editModeBlinkOn = true;
-    m_pLCD->edit(row, offset, s_space);
-  }
-  m_editModeBlinkRow = row;
-  m_editModeBlinkOffset = offset;
-}
-
 void SyrupDisplayManager::shouldDraw()
 {
   m_currentDrawDelay = (long)millis() + DELAY_BETWEEN_POSSIBLE_SHOULD_DRAWS;
@@ -446,33 +428,7 @@ void SyrupDisplayManager::draw()
 
 void SyrupDisplayManager::drawDuration(bool useAverage)
 {
-  char durationString[17];
-  if (useAverage) {
-    strcpy(durationString, s_average);
-  }
-  else {
-    strcpy(durationString, s_last);
-  }
-  strcat(durationString, s_space);
-  strcat(durationString, s_duration);
-  strcat(durationString, s_space);
-  strcat(durationString, s_valveStateOpen);
-  strcat(durationString, s_colon);
-  m_pLCD->write(0, durationString);
-  
-  if (useAverage) {
-    strcpy(durationString, s_average);
-  }
-  else {
-    strcpy(durationString, s_last);
-  }
-  strcat(durationString, s_space);
-  strcat(durationString, s_duration);
-  strcat(durationString, s_space);
-  strcat(durationString, s_valveStateClosed);
-  strcat(durationString, s_colon);
-  m_pLCD->write(1, durationString);
-  
+  char durationString[25];  
   int offsetLine1;
   int offsetLine2;
   unsigned long durOpen;
@@ -490,13 +446,45 @@ void SyrupDisplayManager::drawDuration(bool useAverage)
     durClosed = m_pStats->m_lastDurationClosed;  
   }
   
-  *durationString = LCDController::NULL_TERMINATOR;
-  appendDurationString(durationString, durOpen, false, false);
-  m_pLCD->edit(0, offsetLine1, durationString);
+  if (useAverage) {
+    strcpy(durationString, s_average);
+  }
+  else {
+    strcpy(durationString, s_last);
+  }
+  strcat(durationString, s_space);
+  strcat(durationString, s_duration);
+  strcat(durationString, s_space);
+  strcat(durationString, s_valveStateOpen);
+  strcat(durationString, s_colon);
+  strcat(durationString, s_space);
+  if (durOpen != 0) {
+    appendDurationString(durationString, durOpen, false, false);
+  }
+  else {
+    strcat(durationString, s_calculating);
+  }
+  m_pLCD->write(0, durationString);
   
-  *durationString = LCDController::NULL_TERMINATOR;
-  appendDurationString(durationString, durClosed, false, false);
-  m_pLCD->edit(1, offsetLine2, durationString);
+  if (useAverage) {
+    strcpy(durationString, s_average);
+  }
+  else {
+    strcpy(durationString, s_last);
+  }
+  strcat(durationString, s_space);
+  strcat(durationString, s_duration);
+  strcat(durationString, s_space);
+  strcat(durationString, s_valveStateClosed);
+  strcat(durationString, s_colon);
+  strcat(durationString, s_space);
+  if (durClosed != 0) {
+    appendDurationString(durationString, durClosed, false, false);
+  }
+  else {
+    strcat(durationString, s_calculating);
+  }
+  m_pLCD->write(1, durationString);
 }
 
 void SyrupDisplayManager::drawSettingSaved()
@@ -564,7 +552,6 @@ void SyrupDisplayManager::drawWelcome()
 void SyrupDisplayManager::drawMain()
 {
   char row[18];
-  //sprintf(row1, "%s%s%s", s_mainTemp, s_colon, s_space);
   strcpy(row, s_mainTemp);
   strcat(row, s_colon);
   strcat(row, s_space);
@@ -583,13 +570,21 @@ void SyrupDisplayManager::drawMain()
   m_pLCD->edit(1, 17, row);
 }
 
-void SyrupDisplayManager::appendTempString(char *string, float temp)
+void SyrupDisplayManager::editModeBlinkDraw(int row, int offset)
 {
-  int charLength = 6;
-  char tempStr[7];
-  dtostrf(temp, 4, 2, tempStr);
-  strcat(string, tempStr);
-  appendSpaces(string, charLength, tempStr);
+  if (m_editModeBlinkOn) {
+    if (m_editModeBlinkRow != row || m_editModeBlinkOffset != offset) {
+      m_pLCD->edit(m_editModeBlinkRow, m_editModeBlinkOffset, s_colon);
+    }
+    m_editModeBlinkOn = false;
+    m_pLCD->edit(row, offset, s_colon);
+  }
+  else {
+    m_editModeBlinkOn = true;
+    m_pLCD->edit(row, offset, s_space);
+  }
+  m_editModeBlinkRow = row;
+  m_editModeBlinkOffset = offset;
 }
 
 
@@ -599,6 +594,15 @@ void SyrupDisplayManager::appendTempString(char *string, float temp)
 ### APPENDING ###
 #################
 */
+void SyrupDisplayManager::appendTempString(char *string, float temp)
+{
+  int charLength = 6;
+  char tempStr[7];
+  dtostrf(temp, 4, 2, tempStr);
+  strcat(string, tempStr);
+  appendSpaces(string, charLength, tempStr);
+}
+
 void SyrupDisplayManager::appendTempStringMain(char *string)
 {
   int charLength = 7;
@@ -618,9 +622,6 @@ void SyrupDisplayManager::appendTempStringMain(char *string)
   }
   else {
     strcpy(tempStr, s_calculating);
-    strcat(tempStr, s_period);
-    strcat(tempStr, s_period);
-    strcat(tempStr, s_period);
   }
   strcat(string, tempStr);
   appendSpaces(string, charLength, tempStr);
