@@ -8,8 +8,8 @@ template <class T>
 class Observer
 {
   public:
-    Observer() {}
-    virtual ~Observer() {}
+    Observer() {};
+    ~Observer() {}
     virtual void update(T *subject) = 0;
 };
 

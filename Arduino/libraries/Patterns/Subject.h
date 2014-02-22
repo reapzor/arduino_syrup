@@ -13,7 +13,7 @@ class Subject
   public:
     typedef typename std::vector<Observer<T> *>::iterator t_iterator;
     Subject() {}
-    virtual ~Subject() {}
+    ~Subject() {}
     void attach(Observer<T> *observer)
     {
       m_observers.push_back(observer);
