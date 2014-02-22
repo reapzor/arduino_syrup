@@ -8,7 +8,8 @@ TempValveManager::TempValveManager(TempProbe *tempProbe, ValveController *valveC
     Observer<TempProbe>(), Subject<TempValveManager>()
 {
   m_thresholdRegion = UNDEF;
-  m_hasDoneUpperBoundsTask = false;
+  m_taskSwitch = false;
+  m_taskRun = NO_TASK;
 }
 TempValveManager::~TempValveManager()
 {
@@ -86,8 +87,9 @@ void TempValveManager::updateThreshold(float temp, float boundsThreshold)
     #ifdef DEBUG_THRES
       Serial.println(F("TVM: LOWER"));
     #endif
-    tryLowerBoundsTask();
-    notify();
+    if (!tryLowerBoundsTask()) {
+      notify();
+    }
     return;
   }
   if (temp < (lowerThreshold - boundsThreshold) && m_thresholdRegion != BELOW) {
@@ -95,26 +97,29 @@ void TempValveManager::updateThreshold(float temp, float boundsThreshold)
     #ifdef DEBUG_THRES
       Serial.println(F("TVM: BELOW"));
     #endif
-    tryLowerBoundsTask();
-    notify();
+    if (!tryLowerBoundsTask()) {
+      notify();
+    }
     return;
   }
 }
 
-void TempValveManager::tryUpperBoundsTask()
+bool TempValveManager::tryUpperBoundsTask()
 {
-  if (!m_hasDoneUpperBoundsTask || m_thresholdRegion == UNDEF) {
+  if (!m_taskSwitch) {
     doUpperBoundsTask();
-    m_hasDoneUpperBoundsTask = true;
+    m_taskSwitch = true;
   }
+  return m_taskSwitch;
 }
 
-void TempValveManager::tryLowerBoundsTask()
+bool TempValveManager::tryLowerBoundsTask()
 {
-  if (m_hasDoneUpperBoundsTask || m_thresholdRegion == UNDEF) {
+  if (m_taskSwitch) {
     doLowerBoundsTask();
-    m_hasDoneUpperBoundsTask = false;
+    m_taskSwitch = false;
   }
+  return !m_taskSwitch;
 }
 
 void TempValveManager::doUpperBoundsTask()
@@ -123,6 +128,9 @@ void TempValveManager::doUpperBoundsTask()
     Serial.println(F("TVM: UPPER BOUNDS"));
   #endif
   m_pValveController->openValve();
+  m_taskRun = UPPER_TASK;
+  notify();
+  m_taskRun = NO_TASK;
 }
 
 void TempValveManager::doLowerBoundsTask()
@@ -131,5 +139,8 @@ void TempValveManager::doLowerBoundsTask()
     Serial.println(F("TVM: LOWER BOUNDS"));
   #endif
   m_pValveController->closeValve();
+  m_taskRun = LOWER_TASK;
+  notify();
+  m_taskRun = NO_TASK;
 }
 

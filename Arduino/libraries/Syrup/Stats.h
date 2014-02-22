@@ -4,15 +4,14 @@
 
 #include "Arduino.h"
 #include "Subject.h"
-#include <TempProbe.h>
-#include <ValveController.h>
+#include <TempValveManager.h>
 #include "Observer.h"
 
 #define DEV
 //#define DEBUG_OBSERVERS
 //#define DEBUG
     
-class Stats : public Subject<Stats>, public Observer<ValveController>,
+class Stats : public Subject<Stats>, public Observer<TempValveManager>,
     public Observer<TempProbe>
 {
   public:
@@ -52,18 +51,18 @@ class Stats : public Subject<Stats>, public Observer<ValveController>,
     void prime();
     void tick();
     
-    void update(ValveController *valve);
+    void update(TempValveManager *tempValveManager);
     void update(TempProbe *tempProbe);
     
     void reset();
     
-    Stats(ValveController *valveController, TempProbe *tempProbe);
+    Stats(TempValveManager *tempValveManager, TempProbe *tempProbe);
     ~Stats();
     
   private:
     static const int ONE_SECOND = 1000;
     static const long ONE_MINUTE = 60000;
-    ValveController *m_pValveController;
+    TempValveManager *m_pTempValveManager;
     TempProbe *m_pTempProbe;
     long m_nextMinute;
     long m_nextSecond;
@@ -73,7 +72,6 @@ class Stats : public Subject<Stats>, public Observer<ValveController>,
     void setNextMinute();
     void updateFreeMem();
     void sendNotify(e_statsValues statsValue);
-    void sendNotify(e_statsValues statsValue, bool shouldReturnToIdle);
     
 };
 

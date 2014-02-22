@@ -2,9 +2,9 @@
 #include "Stats.h"
 #include <MemoryFree.h>
 
-Stats::Stats(ValveController *valveController, TempProbe *tempProbe) :
-    m_pValveController(valveController), m_pTempProbe(tempProbe),
-    Subject<Stats>(), Observer<ValveController>(), Observer<TempProbe>()
+Stats::Stats(TempValveManager *tempValveManager, TempProbe *tempProbe) :
+    m_pTempValveManager(tempValveManager), m_pTempProbe(tempProbe),
+    Subject<Stats>(), Observer<TempValveManager>(), Observer<TempProbe>()
 {
   reset();
   m_uptime = 0;
@@ -38,63 +38,60 @@ void Stats::reset()
 void Stats::registerObservers()
 {
   m_pTempProbe->attach(this);
-  m_pValveController->attach(this);
+  m_pTempValveManager->attach(this);
 }
 
 void Stats::unregisterObservers()
 {
   m_pTempProbe->detach(this);
-  m_pValveController->detach(this);
+  m_pTempValveManager->detach(this);
 }
 
-void Stats::update(ValveController *valve)
+void Stats::update(TempValveManager *tempValveManager)
 {
-  if (valve->m_isStateForced) {
-    return;
-  }
-  switch(valve->m_valveState)
+  switch(tempValveManager->m_taskRun)
   {
-    case ValveController::OPEN:
+    case TempValveManager::UPPER_TASK:
       m_lastDurationClosed = m_currentDuration;
-      sendNotify(LAST_DURATION_CLOSED, false);
+      sendNotify(LAST_DURATION_CLOSED);
       m_countOpen++;
       #ifdef DEBUG_OBSERVERS
         Serial.print(F("VALVE OBSERVER CHANGE! COUNT OPEN: "));
         Serial.println(m_countOpen);
       #endif
-      sendNotify(COUNT_OPEN, false);
+      sendNotify(COUNT_OPEN);
       m_currentDuration = 0;
       resetNextSecond();
-      sendNotify(CURRENT_DURATION, false);
+      sendNotify(CURRENT_DURATION);
       if (m_countClosed == 0) {
         m_averageDurationClosed = 0;
       }
       else {
         m_averageDurationClosed = ((m_averageDurationClosed * (m_countClosed-1))
           + m_lastDurationClosed) / m_countClosed;
+        sendNotify(AVERAGE_DURATION_CLOSED);
       }
-      sendNotify(AVERAGE_DURATION_CLOSED);
       break;
-    case ValveController::CLOSED:
+    case TempValveManager::LOWER_TASK:
       m_lastDurationOpen = m_currentDuration;
-      sendNotify(LAST_DURATION_OPEN, false);
+      sendNotify(LAST_DURATION_OPEN);
       m_countClosed++;
       #ifdef DEBUG_OBSERVERS
         Serial.print(F("VALVE OBSERVER CHANGE! COUNT CLOSED: "));
         Serial.println(m_countClosed);
       #endif
-      sendNotify(COUNT_CLOSED, false);
+      sendNotify(COUNT_CLOSED);
       m_currentDuration = 0;
       resetNextSecond();
-      sendNotify(CURRENT_DURATION, false);
+      sendNotify(CURRENT_DURATION);
       if (m_countOpen == 0) {
         m_averageDurationOpen = 0;
       }
       else {
         m_averageDurationOpen = ((m_averageDurationOpen * (m_countOpen-1))
           + m_lastDurationOpen) / m_countOpen;
+        sendNotify(AVERAGE_DURATION_OPEN);
       }
-      sendNotify(AVERAGE_DURATION_OPEN);
       break;
   }
 }
@@ -114,16 +111,9 @@ void Stats::update(TempProbe *tempProbe)
 
 void Stats::sendNotify(e_statsValues statsValue)
 {
-  sendNotify(statsValue, true);
-}
-
-void Stats::sendNotify(e_statsValues statsValue, bool shouldReturnToIdle)
-{
   m_updatedStatsValue = statsValue;
   notify();
-  if (shouldReturnToIdle) {
-    m_updatedStatsValue = IDLE;
-  }
+  m_updatedStatsValue = IDLE;
 }
 
 void Stats::prime()
@@ -160,7 +150,7 @@ void Stats::tick()
       Serial.print(F("Up: "));
       Serial.println(m_uptime);
     #endif
-    sendNotify(UPTIME, false);    
+    sendNotify(UPTIME);    
     updateFreeMem();
   }
 }

@@ -26,10 +26,17 @@ class TempValveManager : public Observer<TempProbe>, public Subject<TempValveMan
       UPPER,
       OVER
     };
+    enum e_taskRun
+    {
+      NO_TASK,
+      UPPER_TASK,
+      LOWER_TASK
+    };
     TempValveManager(TempProbe *tempProbe, ValveController *valveController,
       SyrupSettingsManager *settingsManager);
     ~TempValveManager();
     e_thresholdRegion m_thresholdRegion;
+    e_taskRun m_taskRun;
     static const int BOUNDS_THRESHOLD_F = 1;
     static const float BOUNDS_THRESHOLD_C = 0.555;
     
@@ -43,9 +50,9 @@ class TempValveManager : public Observer<TempProbe>, public Subject<TempValveMan
     ValveController *m_pValveController;
     SyrupSettingsManager *m_pSettingsManager;
     void updateThreshold(float temp, float boundsThreshold);
-    bool m_hasDoneUpperBoundsTask;
-    void tryUpperBoundsTask();
-    void tryLowerBoundsTask();
+    bool m_taskSwitch;
+    bool tryUpperBoundsTask();
+    bool tryLowerBoundsTask();
     void doUpperBoundsTask();
     void doLowerBoundsTask();
 };

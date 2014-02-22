@@ -39,12 +39,12 @@
  
  SyrupSettingsManager settingsManager;
  
- Stats stats(&valveController, &tempProbe);
- 
  OverrideManager overrideManager(&toggleButton, &overrideSwitch, &valveController);
 
  TempValveManager tempValveManager(&tempProbe, &valveController, &settingsManager);
  
+ Stats stats(&tempValveManager, &tempProbe);
+  
  SyrupDisplayManager displayManager(&lcd, &tempProbe, &valveController,
      &stats, &overrideManager, &toggleButton, &settingsManager, &encoder,
      &tempValveManager);    

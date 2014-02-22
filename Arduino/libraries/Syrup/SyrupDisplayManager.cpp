@@ -437,7 +437,7 @@ void SyrupDisplayManager::drawDuration(bool useAverage)
     offsetLine1 = 14;
     offsetLine2 = 16;
     durOpen = m_pStats->m_averageDurationOpen;
-    durClosed = m_pStats->m_lastDurationClosed;
+    durClosed = m_pStats->m_averageDurationClosed;
   }
   else {
     offsetLine1 = 15;
