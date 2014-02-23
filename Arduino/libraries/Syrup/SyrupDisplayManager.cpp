@@ -230,7 +230,7 @@ void SyrupDisplayManager::update(Stats *stats)
         char durationString[7];
         *durationString = LCDController::NULL_TERMINATOR;
         appendDurationString(durationString, stats->m_averageDurationOpen, false, false);
-        m_pLCD->edit(0, 1, durationString);
+        m_pLCD->edit(0, 14, durationString);
       }
       break;
     case Stats::AVERAGE_DURATION_CLOSED:
@@ -474,10 +474,12 @@ void SyrupDisplayManager::draw()
     case SYS_INFO:
       drawSysInfo();
       break;
-    default:
-      m_pLCD->clear();
-      m_pLCD->write(1, s_welcomeLineOne);      
-      break;
+    #ifdef DEBUG
+      default:
+        m_pLCD->clear();
+        m_pLCD->write(1, s_welcomeLineOne);      
+        break;
+    #endif
   }
 }
 
