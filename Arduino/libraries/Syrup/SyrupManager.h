@@ -1,6 +1,6 @@
 //Chux
-#ifndef SyrupDisplayManager_h
-#define SyrupDisplayManager_h
+#ifndef SyrupManager_h
+#define SyrupManager_h
 
 #include "Arduino.h"
 
@@ -19,7 +19,7 @@
 //#define DEBUG_OBSERVERS
 #define DEBUG
 
-class SyrupDisplayManager : public Observer<TempProbe>, public Observer<ValveController>,
+class SyrupManager : public Observer<TempProbe>, public Observer<ValveController>,
   public Observer<Stats>, public Observer<ToggleButton>, public Observer<OverrideManager>, 
   public Observer<THRESEditor>, public Observer<TempValveManager>
 {
@@ -107,7 +107,7 @@ class SyrupDisplayManager : public Observer<TempProbe>, public Observer<ValveCon
     void update(THRESEditor *thresEditor);
     void update(TempValveManager *tempValveManager);
     
-    SyrupDisplayManager(LCDController *lcd, TempProbe *tempProbe,
+    SyrupManager(LCDController *lcd, TempProbe *tempProbe,
       ValveController *valve, Stats *stats, OverrideManager *overrideManager,
       ToggleButton *toggleButton, SyrupSettingsManager *settingsManager,
       Encoder *encoder, TempValveManager *tempValveManager);

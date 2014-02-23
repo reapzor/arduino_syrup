@@ -1,7 +1,7 @@
 //Chux
-#include "SyrupDisplayManager.h"
+#include "SyrupManager.h"
 
-SyrupDisplayManager::SyrupDisplayManager(LCDController *lcd,
+SyrupManager::SyrupManager(LCDController *lcd,
   TempProbe *tempProbe, ValveController *valve, Stats *stats,
   OverrideManager *overrideManager, ToggleButton *toggleButton,
   SyrupSettingsManager *settingsManager, Encoder *encoder,
@@ -30,55 +30,55 @@ SyrupDisplayManager::SyrupDisplayManager(LCDController *lcd,
   m_editModeBlinkOffset = 0;
 }
 
-char* SyrupDisplayManager::s_welcomeLineOne = "THE SYRUP-O-MATIC  V1.0";
-char* SyrupDisplayManager::s_welcomeLineTwo = "CREATED BY CHUCK BENSON";
+char* SyrupManager::s_welcomeLineOne = "THE SYRUP-O-MATIC  V1.0";
+char* SyrupManager::s_welcomeLineTwo = "CREATED BY CHUCK BENSON";
 
-char* SyrupDisplayManager::s_mainTemp = "Temp";
-char* SyrupDisplayManager::s_mainValve = "Valve";
-char* SyrupDisplayManager::s_mainTime = "Time";
+char* SyrupManager::s_mainTemp = "Temp";
+char* SyrupManager::s_mainValve = "Valve";
+char* SyrupManager::s_mainTime = "Time";
 
-char* SyrupDisplayManager::s_calculating = "CALC...";
-char* SyrupDisplayManager::s_period = ".";
+char* SyrupManager::s_calculating = "CALC...";
+char* SyrupManager::s_period = ".";
 
-char* SyrupDisplayManager::s_tempDegreeF = "F";
-char* SyrupDisplayManager::s_tempDegreeC = "C";
-char* SyrupDisplayManager::s_valveStateOpen = "OPEN";
-char* SyrupDisplayManager::s_valveStateClosed = "CLOSED";
+char* SyrupManager::s_tempDegreeF = "F";
+char* SyrupManager::s_tempDegreeC = "C";
+char* SyrupManager::s_valveStateOpen = "OPEN";
+char* SyrupManager::s_valveStateClosed = "CLOSED";
 
-char* SyrupDisplayManager::s_seenMax = "MAX";
-char* SyrupDisplayManager::s_seenMin = "MIN";
-char* SyrupDisplayManager::s_seenObserved = "SEEN";
-char* SyrupDisplayManager::s_scale = "Scale";
+char* SyrupManager::s_seenMax = "MAX";
+char* SyrupManager::s_seenMin = "MIN";
+char* SyrupManager::s_seenObserved = "SEEN";
+char* SyrupManager::s_scale = "Scale";
 
-char* SyrupDisplayManager::s_last = "LAST";
-char* SyrupDisplayManager::s_duration = "DUR";
+char* SyrupManager::s_last = "LAST";
+char* SyrupManager::s_duration = "DUR";
 
-char* SyrupDisplayManager::s_daysChar = "D";
-char* SyrupDisplayManager::s_hoursChar = "H";
-char* SyrupDisplayManager::s_minutesChar = "m";
-char* SyrupDisplayManager::s_secondsChar = "s";
-char* SyrupDisplayManager::s_zeroChar = "0";
+char* SyrupManager::s_daysChar = "D";
+char* SyrupManager::s_hoursChar = "H";
+char* SyrupManager::s_minutesChar = "m";
+char* SyrupManager::s_secondsChar = "s";
+char* SyrupManager::s_zeroChar = "0";
 
-char* SyrupDisplayManager::s_space = " ";
+char* SyrupManager::s_space = " ";
 
-char* SyrupDisplayManager::s_average = "AVG";
+char* SyrupManager::s_average = "AVG";
 
-char* SyrupDisplayManager::s_count = "COUNT";
+char* SyrupManager::s_count = "COUNT";
 
-char* SyrupDisplayManager::s_tempCaps = "TEMP";
-char* SyrupDisplayManager::s_valveCaps = "VALVE";
-char* SyrupDisplayManager::s_overrideValveOverride = "OVERRIDE";
+char* SyrupManager::s_tempCaps = "TEMP";
+char* SyrupManager::s_valveCaps = "VALVE";
+char* SyrupManager::s_overrideValveOverride = "OVERRIDE";
 
-char* SyrupDisplayManager::s_savedLineOne = "SETTINGS";
-char* SyrupDisplayManager::s_savedLineTwo = "SAVED";
-char* SyrupDisplayManager::s_canceledLineTwo = "CANCELED";
+char* SyrupManager::s_savedLineOne = "SETTINGS";
+char* SyrupManager::s_savedLineTwo = "SAVED";
+char* SyrupManager::s_canceledLineTwo = "CANCELED";
 
-char* SyrupDisplayManager::s_systemUptime = "UPTIME";
-char* SyrupDisplayManager::s_systemFreeMem = "FREE MEM";
+char* SyrupManager::s_systemUptime = "UPTIME";
+char* SyrupManager::s_systemFreeMem = "FREE MEM";
 
-char* SyrupDisplayManager::s_colon = ":";
+char* SyrupManager::s_colon = ":";
 
-void SyrupDisplayManager::transitionToNextState()
+void SyrupManager::transitionToNextState()
 {
   if (m_displayState <= SYS_INFO) {
     if (m_displayState == SYS_INFO) {
@@ -89,7 +89,7 @@ void SyrupDisplayManager::transitionToNextState()
   }
 }
 
-void SyrupDisplayManager::setState(e_displayState state)
+void SyrupManager::setState(e_displayState state)
 {
   if (m_transitioning) {
     #ifdef DEBUG
@@ -137,7 +137,7 @@ void SyrupDisplayManager::setState(e_displayState state)
 ###############################
 */
 //THRESEDITOR
-void SyrupDisplayManager::update(THRESEditor *thresEditor)
+void SyrupManager::update(THRESEditor *thresEditor)
 {
   char value[7];
   *value = LCDController::NULL_TERMINATOR;
@@ -159,7 +159,7 @@ void SyrupDisplayManager::update(THRESEditor *thresEditor)
 }
 
 //TEMP PROBE
-void SyrupDisplayManager::update(TempProbe *tempProbe)
+void SyrupManager::update(TempProbe *tempProbe)
 {
   switch (m_displayState)
   {
@@ -173,7 +173,7 @@ void SyrupDisplayManager::update(TempProbe *tempProbe)
 }
 
 //VALVE CONTROLLER
-void SyrupDisplayManager::update(ValveController *valve)
+void SyrupManager::update(ValveController *valve)
 {
   char valveStr[7];
   *valveStr = LCDController::NULL_TERMINATOR;
@@ -197,7 +197,7 @@ void SyrupDisplayManager::update(ValveController *valve)
 }
 
 //STATISTICS
-void SyrupDisplayManager::update(Stats *stats)
+void SyrupManager::update(Stats *stats)
 {
   switch (stats->m_updatedStatsValue)
   {
@@ -295,6 +295,7 @@ void SyrupDisplayManager::update(Stats *stats)
         case LAST_DUR:
         case AVERAGE_DUR:
         case COUNT:
+        case TEMP_MAX_MIN:
           shouldDraw();
           break;
       }
@@ -303,7 +304,7 @@ void SyrupDisplayManager::update(Stats *stats)
 }
 
 //TOGGLE BUTTON
-void SyrupDisplayManager::update(ToggleButton *toggleButton)
+void SyrupManager::update(ToggleButton *toggleButton)
 {
   if (toggleButton->m_buttonState == ToggleButton::ON) {
     m_prepForTransition = true;
@@ -339,13 +340,13 @@ void SyrupDisplayManager::update(ToggleButton *toggleButton)
 }
 
 //TEMP VALVE MANAGER
-void SyrupDisplayManager::update(TempValveManager *tempValveManager)
+void SyrupManager::update(TempValveManager *tempValveManager)
 {
   //Serial.println(tempValveManager->m_thresholdRegion);
 }
 
 //OVERRIDE MANAGER
-void SyrupDisplayManager::update(OverrideManager *overrideManager)
+void SyrupManager::update(OverrideManager *overrideManager)
 {
   if (overrideManager->isValveOverrideEnabled()) {
     m_pToggleButton->detach(this);
@@ -358,13 +359,13 @@ void SyrupDisplayManager::update(OverrideManager *overrideManager)
 }
 
 
-void SyrupDisplayManager::prime()
+void SyrupManager::prime()
 {
   registerObservers();
   setState(WELCOME);
 }
 
-void SyrupDisplayManager::tick()
+void SyrupManager::tick()
 {
   if (m_transitioning && (long)millis()-m_currentTransitionDelay >= 0) {
     m_currentTransitionDelay = 0;
@@ -431,13 +432,13 @@ void SyrupDisplayManager::tick()
 ###  DRAWING  ###
 #################
 */
-void SyrupDisplayManager::shouldDraw()
+void SyrupManager::shouldDraw()
 {
   m_currentDrawDelay = (long)millis() + DELAY_BETWEEN_POSSIBLE_SHOULD_DRAWS;
   m_shouldDraw = true;
 }
 
-void SyrupDisplayManager::draw()
+void SyrupManager::draw()
 {
   switch (m_displayState)
   {
@@ -477,13 +478,15 @@ void SyrupDisplayManager::draw()
     #ifdef DEBUG
       default:
         m_pLCD->clear();
-        m_pLCD->write(1, s_welcomeLineOne);      
+        m_pLCD->write(1, s_welcomeLineOne);    
+        Serial.print("NYI STATE: ");
+        Serial.println(m_displayState);
         break;
     #endif
   }
 }
 
-void SyrupDisplayManager::drawMaxMin()
+void SyrupManager::drawMaxMin()
 {
   char tempStr[24];
   strcpy(tempStr, s_seenMax);
@@ -507,7 +510,7 @@ void SyrupDisplayManager::drawMaxMin()
   m_pLCD->write(1, tempStr);  
 }
 
-void SyrupDisplayManager::drawSysInfo()
+void SyrupManager::drawSysInfo()
 {
   char infoStr[16];
   char infoIntStr[5];
@@ -523,10 +526,9 @@ void SyrupDisplayManager::drawSysInfo()
   itoa(m_pStats->m_freeMem, infoIntStr, 10);
   strcat(infoStr, infoIntStr);
   m_pLCD->write(1, infoStr);
-  
 }
 
-void SyrupDisplayManager::drawCount()
+void SyrupManager::drawCount()
 {
   char countStr[15];
   char countIntStr[6];
@@ -549,7 +551,7 @@ void SyrupDisplayManager::drawCount()
   m_pLCD->write(1, countStr);  
 }
 
-void SyrupDisplayManager::drawDuration(bool useAverage)
+void SyrupManager::drawDuration(bool useAverage)
 {
   char durationString[25];  
   int offsetLine1;
@@ -610,21 +612,21 @@ void SyrupDisplayManager::drawDuration(bool useAverage)
   m_pLCD->write(1, durationString);
 }
 
-void SyrupDisplayManager::drawSettingSaved()
+void SyrupManager::drawSettingSaved()
 {
   m_pLCD->clear();
   m_pLCD->edit(0, 8, s_savedLineOne);
   m_pLCD->edit(1, 9, s_savedLineTwo);
 }
 
-void SyrupDisplayManager::drawSettingCanceled()
+void SyrupManager::drawSettingCanceled()
 {
   m_pLCD->clear();
   m_pLCD->edit(0, 7, s_savedLineOne);
   m_pLCD->edit(1, 8, s_canceledLineTwo);
 }
 
-void SyrupDisplayManager::drawThres()
+void SyrupManager::drawThres()
 {
   char row[15];
   strcpy(row, s_valveStateOpen);
@@ -649,7 +651,7 @@ void SyrupDisplayManager::drawThres()
   m_pLCD->edit(0, scaleStrOffset, s_savedLineOne);
 }
 
-void SyrupDisplayManager::drawValveOverride()
+void SyrupManager::drawValveOverride()
 {
   m_pLCD->clear();
 
@@ -666,13 +668,13 @@ void SyrupDisplayManager::drawValveOverride()
   m_pLCD->edit(1, 6, row);
 }
 
-void SyrupDisplayManager::drawWelcome()
+void SyrupManager::drawWelcome()
 {
   m_pLCD->write(0, s_welcomeLineOne);
   m_pLCD->write(1, s_welcomeLineTwo);
 }
 
-void SyrupDisplayManager::drawMain()
+void SyrupManager::drawMain()
 {
   char row[18];
   strcpy(row, s_mainTemp);
@@ -693,7 +695,7 @@ void SyrupDisplayManager::drawMain()
   m_pLCD->edit(1, 17, row);
 }
 
-void SyrupDisplayManager::editModeBlinkDraw(int row, int offset)
+void SyrupManager::editModeBlinkDraw(int row, int offset)
 {
   if (m_editModeBlinkOn) {
     if (m_editModeBlinkRow != row || m_editModeBlinkOffset != offset) {
@@ -717,7 +719,7 @@ void SyrupDisplayManager::editModeBlinkDraw(int row, int offset)
 ### APPENDING ###
 #################
 */
-void SyrupDisplayManager::appendTempString(char *string, float temp)
+void SyrupManager::appendTempString(char *string, float temp)
 {
   int charLength = 6;
   char tempStr[7];
@@ -726,7 +728,7 @@ void SyrupDisplayManager::appendTempString(char *string, float temp)
   appendSpaces(string, charLength, tempStr);
 }
 
-void SyrupDisplayManager::appendTempStringMaxMin(char *string, int tempDigital)
+void SyrupManager::appendTempStringMaxMin(char *string, int tempDigital)
 {
   char tempStr[8];
   float tempVal;
@@ -747,7 +749,7 @@ void SyrupDisplayManager::appendTempStringMaxMin(char *string, int tempDigital)
   appendSpaces(string, 7, tempStr);
 }
 
-void SyrupDisplayManager::appendTempStringMain(char *string)
+void SyrupManager::appendTempStringMain(char *string)
 {
   char tempStr[8];
   if (m_pTempProbe->m_tempProbeReading != 0) {
@@ -770,7 +772,7 @@ void SyrupDisplayManager::appendTempStringMain(char *string)
   appendSpaces(string, 7, tempStr);
 }
 
-void SyrupDisplayManager::appendTempScaleSymbol(char* string, TempProbe::e_scale scale)
+void SyrupManager::appendTempScaleSymbol(char* string, TempProbe::e_scale scale)
 {
   switch(scale)
   {
@@ -783,7 +785,7 @@ void SyrupDisplayManager::appendTempScaleSymbol(char* string, TempProbe::e_scale
   }
 }
 
-void SyrupDisplayManager::appendValveStateString(char* string)
+void SyrupManager::appendValveStateString(char* string)
 {
   switch (m_pValve->m_valveState)
   {
@@ -799,12 +801,12 @@ void SyrupDisplayManager::appendValveStateString(char* string)
   }
 }
 
-void SyrupDisplayManager::appendDurationString(char* string, unsigned long time,
+void SyrupManager::appendDurationString(char* string, unsigned long time,
   bool rightOriented, bool animate)
 {
   appendDurationString(string, time, rightOriented, animate, false);
 }
-void SyrupDisplayManager::appendDurationString(char* string, unsigned long time,
+void SyrupManager::appendDurationString(char* string, unsigned long time,
   bool rightOriented, bool animate, bool isMinutes)
 {
   int charLength = 7;
@@ -912,7 +914,7 @@ void SyrupDisplayManager::appendDurationString(char* string, unsigned long time,
   }
 }
 
-void SyrupDisplayManager::appendSpaces(char* string, int length, char* baseString)
+void SyrupManager::appendSpaces(char* string, int length, char* baseString)
 {
   int spacesNeeded = length-strlen(baseString);
   for (int x = 0; x < spacesNeeded; x++) {
@@ -927,7 +929,7 @@ void SyrupDisplayManager::appendSpaces(char* string, int length, char* baseStrin
 ###  HELPERS  ###
 #################
 */
-void SyrupDisplayManager::registerObservers()
+void SyrupManager::registerObservers()
 {
   m_pTempProbe->attach(this);
   m_pValve->attach(this);
@@ -937,7 +939,7 @@ void SyrupDisplayManager::registerObservers()
   m_pTempValveManager->attach(this);
 }
 
-void SyrupDisplayManager::unregisterObservers()
+void SyrupManager::unregisterObservers()
 {
   m_pTempProbe->detach(this);
   m_pValve->detach(this);
@@ -947,7 +949,7 @@ void SyrupDisplayManager::unregisterObservers()
   m_pTempValveManager->detach(this);
 }
 
-void SyrupDisplayManager::cancelThresEditMode()
+void SyrupManager::cancelThresEditMode()
 {
   if (m_pTHRESEditor != NULL) {
     m_pTHRESEditor->leaveEditMode();

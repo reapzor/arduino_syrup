@@ -16,9 +16,9 @@
 #include <LCDController.h>
 #include "ToggleButton.h"
 #include "OverrideSwitch.h"
-#include <SyrupSettingsManager.h>
+#include <SyrupManager.h>
 #include "Stats.h"
-#include "SyrupDisplayManager.h"
+#include "SyrupManager.h"
 #include "OverrideManager.h"
 #include "TempValveManager.h"
 #include "THRESEditor.h"
@@ -46,7 +46,7 @@
  
  Stats stats(&tempValveManager, &tempProbe);
   
- SyrupDisplayManager displayManager(&lcd, &tempProbe, &valveController,
+ SyrupManager syrupManager(&lcd, &tempProbe, &valveController,
      &stats, &overrideManager, &toggleButton, &settingsManager, &encoder,
      &tempValveManager);    
      
@@ -62,7 +62,7 @@
     tempProbe.prime();
     tempValveManager.registerObservers();
     overrideManager.registerObservers();
-    displayManager.prime();
+    syrupManager.prime();
     stats.prime();
  } 
 
@@ -75,5 +75,5 @@
    tempProbe.tick();
    valveController.tick();
    stats.tick();
-   displayManager.tick();
+   syrupManager.tick();
  } 
