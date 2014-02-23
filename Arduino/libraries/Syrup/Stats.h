@@ -63,8 +63,8 @@ class Stats : public Subject<Stats>, public Observer<TempValveManager>,
     static const long ONE_MINUTE = 60000;
     TempValveManager *m_pTempValveManager;
     TempProbe *m_pTempProbe;
-    long m_nextMinute;
-    long m_nextSecond;
+    unsigned long m_nextMinute;
+    unsigned long m_nextSecond;
     void resetNextSecond();
     void resetNextMinute();
     void setNextSecond();

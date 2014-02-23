@@ -35,8 +35,8 @@ class TempProbe : public Subject<TempProbe>
     
   private:
     int m_readCount;
-    long m_candidateTempProbeReading;
-    long m_delayTime;
+    unsigned long m_candidateTempProbeReading;
+    unsigned long m_delayTime;
     #ifdef DEBUG_SWEEP_TEMP
       int db_sweepMax;
       int db_sweepMin;

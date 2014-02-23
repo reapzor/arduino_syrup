@@ -102,12 +102,12 @@ int TempProbe::tempCInt()
 
 void TempProbe::prime()
 {
-  m_delayTime = (long)millis();
+  m_delayTime = millis();
 }
 
 void TempProbe::tick()
 {
-  if ((long)millis()-m_delayTime >= 0) {
+  if ((long)(millis() - m_delayTime) >= 0) {
     m_delayTime += READ_DELAY;
     read();
   }

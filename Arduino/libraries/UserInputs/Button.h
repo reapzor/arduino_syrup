@@ -64,19 +64,19 @@ class Button : public Subject<V>
     
     void prime()
     {
-      m_delayTime = (long)millis();
+      m_delayTime = millis();
     }
     
     void tick()
     {
-      if ((long)millis() - m_delayTime >= 0) {
+      if ((long)(millis() - m_delayTime) >= 0) {
         m_delayTime += READ_DELAY;
         read();
       }
     }
     
   private:
-    long m_delayTime;
+    unsigned long m_delayTime;
     static const int READ_DELAY = 7;
     
 };

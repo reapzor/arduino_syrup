@@ -146,7 +146,7 @@ class SyrupManager : public Observer<TempProbe>, public Observer<ValveController
     static const int TOGGLE_BUTTON_COUNT_DURATION = 2000;
     static const int TOGGLE_BUTTON_COUNT = 4;
     static const int TOGGLE_BUTTON_ON_DURATION = 3000;
-    static const int WELCOME_TRANSITION_DELAY = 5000;
+    static const int WELCOME_TRANSITION_DELAY = 4000;
     static const int SETTING_SAVED_TRANSITION_DELAY = 3000;
     static const int DELAY_BETWEEN_POSSIBLE_SHOULD_DRAWS = 300;
     static const int EDIT_MODE_BLINK_TIME = 500;
@@ -154,8 +154,7 @@ class SyrupManager : public Observer<TempProbe>, public Observer<ValveController
     
     bool m_transitioning;
     e_displayState m_nextTransition;
-    long m_currentTransitionDelay;
-    void shouldDraw();
+    unsigned long m_currentTransitionDelay;
     void drawWelcome();
     void drawMain();
     void drawValveOverride();
@@ -166,12 +165,13 @@ class SyrupManager : public Observer<TempProbe>, public Observer<ValveController
     void drawCount();
     void drawMaxMin();
     void drawSysInfo();
+    void shouldDraw();
     
     void cancelThresEditMode();
     void editModeBlinkDraw(int row, int offset);
-    long m_toggleButtonHoldDelay;
-    long m_toggleButtonCountDelay;
-    long m_editModeBlinkTime;
+    unsigned long m_toggleButtonHoldDelay;
+    unsigned long m_toggleButtonCountDelay;
+    unsigned long m_editModeBlinkTime;
     bool m_editModeBlinkOn;
     int m_editModeBlinkRow;
     int m_editModeBlinkOffset;

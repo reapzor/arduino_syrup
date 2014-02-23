@@ -31,7 +31,7 @@ class ValveController : public Subject<ValveController>
     
   private:
     e_valveState m_suggestedState;
-    long m_delayTime;
+    unsigned long m_delayTime;
     bool m_stateIsForced;
     static const int STATE_CHANGE_DELAY = 1000;
     bool delayExpired();

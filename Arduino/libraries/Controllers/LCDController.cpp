@@ -30,6 +30,8 @@ void LCDController::write(int rowCount, char *rows[])
 void LCDController::write(int row, char *line)
 {
   int lineLength = strlen(line);
+  char lineStr[COLUMN_COUNT+1];
+  *lineStr = NULL_TERMINATOR;
   #if defined(DEV) || defined(DEBUG)
     if (row > ROW_COUNT) {
       #ifdef DEBUG
@@ -56,7 +58,10 @@ void LCDController::write(int row, char *line)
       line = "E:CL";
     }
   #endif
-  clear(row);
+  strcpy(lineStr, line);
+  for (int x = lineLength; x < COLUMN_COUNT; x++) {
+    strcat(lineStr, " ");
+  }
   #ifdef DEBUG
     Serial.print(F("Setting LCD Row: "));
     Serial.print(row);
@@ -64,14 +69,14 @@ void LCDController::write(int row, char *line)
     Serial.println(line);
   #endif
   m_pLCD->setCursor(0, row);
-  m_pLCD->print(line);
+  m_pLCD->print(lineStr);
 }
 
 void LCDController::edit(int row, int offset, char *edit)
 {
   int editLength = strlen(edit);
-  int lineLength = offset + editLength;
   #if defined(DEV) || defined(DEBUG)
+    int lineLength = offset + editLength;
     if ((row > ROW_COUNT) || (lineLength > COLUMN_COUNT)) {
       #ifdef DEBUG
         Serial.print(F("Edit Too Big. Row: "));

@@ -120,24 +120,24 @@ void Stats::prime()
 
 void Stats::resetNextSecond()
 {
-  m_nextSecond = (long)millis();
+  m_nextSecond = millis();
   setNextSecond();
 }
 
 void Stats::resetNextMinute()
 {
-  m_nextMinute = (long)millis();
+  m_nextMinute = millis();
   setNextMinute();
 }
 
 void Stats::tick()
 {
-  if ((long)millis()-m_nextSecond >= 0) {
+  if ((long)(millis()-m_nextSecond) >= 0) {
     setNextSecond();
     m_currentDuration++;
     sendNotify(CURRENT_DURATION);
   }  
-  if ((long)millis()-m_nextMinute >= 0) {
+  if ((long)(millis()-m_nextMinute) >= 0) {
     setNextMinute();
     m_uptime++;
     #ifdef DEV

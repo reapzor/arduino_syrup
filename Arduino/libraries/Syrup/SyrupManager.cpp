@@ -112,12 +112,12 @@ void SyrupManager::setState(e_displayState state)
     return;
   }
   if (state == WELCOME) {
-    m_currentTransitionDelay = (long)millis() + WELCOME_TRANSITION_DELAY;
+    m_currentTransitionDelay = millis() + WELCOME_TRANSITION_DELAY;
     m_nextTransition = WELCOME_TRANSITION_STATE;
     m_transitioning = true;
   }
   if (state == SAVED || state == CANCELED) {
-    m_currentTransitionDelay = (long)millis() + SETTING_SAVED_TRANSITION_DELAY;
+    m_currentTransitionDelay = millis() + SETTING_SAVED_TRANSITION_DELAY;
     //Note: You must called setState(SAVED); and another state immediately after for it
     //  to transition to: setState(SAVED); setState(THRES);
     //Otherwise it will sit there forever and not auto transition.
@@ -302,15 +302,15 @@ void SyrupManager::update(ToggleButton *toggleButton)
 {
   if (toggleButton->m_buttonState == ToggleButton::ON) {
     m_prepForTransition = true;
-    m_toggleButtonHoldDelay = (long)millis()+TOGGLE_BUTTON_ON_DURATION;
+    m_toggleButtonHoldDelay = millis() + TOGGLE_BUTTON_ON_DURATION;
     //This probably would be better somewhere else, but progmem is happy having it here
     //Same goes for the other 'THRES' observer(which is coupled with button and tick)
     if (m_displayState == THRES) {
-      if ((long)millis()-m_toggleButtonCountDelay >= 0 && m_toggleButtonPressCount >= 1) {
+      if ((long)(millis() - m_toggleButtonCountDelay) >= 0 && m_toggleButtonPressCount >= 1) {
         m_toggleButtonPressCount = 0;
       }
       if (m_toggleButtonPressCount == 0) {
-        m_toggleButtonCountDelay = (long)millis()+TOGGLE_BUTTON_COUNT_DURATION;
+        m_toggleButtonCountDelay = millis() + TOGGLE_BUTTON_COUNT_DURATION;
       }
       m_toggleButtonPressCount++;
       if (m_toggleButtonPressCount >= TOGGLE_BUTTON_COUNT) {
@@ -329,7 +329,6 @@ void SyrupManager::update(ToggleButton *toggleButton)
       transitionToNextState();
     }
     m_prepForTransition = false;
-    m_toggleButtonHoldDelay = 0;
   }
 }
 
@@ -366,15 +365,14 @@ void SyrupManager::prime()
 
 void SyrupManager::tick()
 {
-  if (m_transitioning && (long)millis()-m_currentTransitionDelay >= 0) {
-    m_currentTransitionDelay = 0;
+  if (m_transitioning && (long)(millis() - m_currentTransitionDelay) >= 0) {
     m_transitioning = false;
     e_displayState displayState = m_nextTransition;
     m_nextTransition = UNDEF;
     setState(displayState);
   }
   if (m_prepForTransition) {
-    if ((long)millis()-m_toggleButtonHoldDelay >= 0) {
+    if ((long)(millis() - m_toggleButtonHoldDelay) >= 0) {
       m_prepForTransition = false;
       switch (m_displayState)
       {
@@ -390,7 +388,7 @@ void SyrupManager::tick()
             m_pTHRESEditor = new THRESEditor(m_pSettingsManager, m_pEncoder, m_pToggleButton);
             m_pTHRESEditor->attach(this);
             m_pTHRESEditor->enterEditMode();
-            m_editModeBlinkTime = (long)millis();
+            m_editModeBlinkTime = millis();
             m_toggleButtonPressCount = 0;
           }        
           break;
@@ -404,8 +402,7 @@ void SyrupManager::tick()
       }
     }
   }
-  if (m_pTHRESEditor != NULL && m_displayState == THRES &&
-      (long)millis()-m_editModeBlinkTime >= 0) {
+  if (m_pTHRESEditor != NULL && (long)(millis() - m_editModeBlinkTime) >= 0) {
     switch(m_pTHRESEditor->m_editItem)
     {
       case THRESEditor::UPPER_THRES:
@@ -420,7 +417,8 @@ void SyrupManager::tick()
     }
     m_editModeBlinkTime += EDIT_MODE_BLINK_TIME;
   }
-  if (m_shouldDraw && (long)millis()-m_currentDrawDelay >= 0) {
+  if (m_shouldDraw && (long)(millis() - m_currentDrawDelay) >= 0) {
+    m_currentDrawDelay = millis() + DELAY_BETWEEN_POSSIBLE_SHOULD_DRAWS;
     m_shouldDraw = false;
     draw();
   }
@@ -435,7 +433,6 @@ void SyrupManager::tick()
 */
 void SyrupManager::shouldDraw()
 {
-  m_currentDrawDelay = (long)millis() + DELAY_BETWEEN_POSSIBLE_SHOULD_DRAWS;
   m_shouldDraw = true;
 }
 
@@ -630,26 +627,26 @@ void SyrupManager::drawSettingCanceled()
 void SyrupManager::drawThres()
 {
   char row[15];
+  int scaleStrOffset = 16;
   strcpy(row, s_valveStateOpen);
   strcat(row, s_colon);
   strcat(row, s_space);
   appendTempString(row, m_pSettingsManager->m_settings.m_upperThreshold);
   m_pLCD->write(0, row);
   
+  m_pLCD->edit(0, scaleStrOffset, s_savedLineOne);
+  
   strcpy(row, s_valveStateClosed);
   strcat(row, s_colon);
   strcat(row, s_space);      
   appendTempString(row, m_pSettingsManager->m_settings.m_lowerThreshold);
   m_pLCD->write(1, row);
-  
-  int scaleStrOffset = 16;
+
   strcpy(row, s_scale);
   strcat(row, s_colon);
   strcat(row, s_space);
   appendTempScaleSymbol(row, m_pSettingsManager->m_settings.m_tempScale);
   m_pLCD->edit(1, scaleStrOffset, row);
-  
-  m_pLCD->edit(0, scaleStrOffset, s_savedLineOne);
 }
 
 void SyrupManager::drawValveOverride()

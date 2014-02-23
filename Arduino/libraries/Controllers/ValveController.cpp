@@ -128,12 +128,12 @@ void ValveController::changeValveState(bool ignoreDelay, e_valveState state)
 
 void ValveController::resetDelay()
 {
-  m_delayTime = (long)millis() + STATE_CHANGE_DELAY;
+  m_delayTime = millis() + STATE_CHANGE_DELAY;
 }
 
 bool ValveController::delayExpired()
 {
-  return ((long)millis()-m_delayTime >= 0);
+  return ((long)(millis() - m_delayTime) >= 0);
 }
 
 void ValveController::forceExpireDelay()

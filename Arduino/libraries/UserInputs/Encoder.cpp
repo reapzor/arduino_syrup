@@ -69,12 +69,12 @@ void Encoder::read()
 
 void Encoder::prime()
 {
-  m_delayTime = (long)millis();
+  m_delayTime = millis();
 }
 
 void Encoder::tick()
 {
-  if ((long)millis() - m_delayTime >= 0) {
+  if ((long)(millis() - m_delayTime) >= 0) {
     m_delayTime += READ_DELAY;
     read();
   }

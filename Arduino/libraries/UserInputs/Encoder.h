@@ -25,7 +25,7 @@ class Encoder : public Subject<Encoder>
     void prime();
     void tick();
   private:
-    long m_delayTime;
+    unsigned long m_delayTime;
     static const int READ_DELAY = 1;
 };
 
