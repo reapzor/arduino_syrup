@@ -47,7 +47,7 @@ char* SyrupDisplayManager::s_valveStateClosed = "CLOSED";
 
 char* SyrupDisplayManager::s_seenMax = "MAX";
 char* SyrupDisplayManager::s_seenMin = "MIN";
-char* SyrupDisplayManager::s_seenObserved = "OBSERVED";
+char* SyrupDisplayManager::s_seenObserved = "SEEN";
 char* SyrupDisplayManager::s_scale = "Scale";
 
 char* SyrupDisplayManager::s_last = "LAST";
@@ -65,6 +65,7 @@ char* SyrupDisplayManager::s_average = "AVG";
 
 char* SyrupDisplayManager::s_count = "COUNT";
 
+char* SyrupDisplayManager::s_tempCaps = "TEMP";
 char* SyrupDisplayManager::s_valveCaps = "VALVE";
 char* SyrupDisplayManager::s_overrideValveOverride = "OVERRIDE";
 
@@ -79,8 +80,8 @@ char* SyrupDisplayManager::s_colon = ":";
 
 void SyrupDisplayManager::transitionToNextState()
 {
-  if (m_displayState <= LCD_INFO) {
-    if (m_displayState == LCD_INFO) {
+  if (m_displayState <= SYS_INFO) {
+    if (m_displayState == SYS_INFO) {
       setState((e_displayState) 0);
       return;
     }
@@ -212,7 +213,7 @@ void SyrupDisplayManager::update(Stats *stats)
       if (m_displayState == LAST_DUR){
         char durationString[7];
         *durationString = LCDController::NULL_TERMINATOR;
-        appendDurationString(durationString, m_pStats->m_lastDurationClosed, false, false);
+        appendDurationString(durationString, stats->m_lastDurationClosed, false, false);
         m_pLCD->edit(1, 17, durationString);
       }
       break;
@@ -220,7 +221,7 @@ void SyrupDisplayManager::update(Stats *stats)
       if (m_displayState == LAST_DUR){
         char durationString[7];
         *durationString = LCDController::NULL_TERMINATOR;
-        appendDurationString(durationString, m_pStats->m_lastDurationOpen, false, false);
+        appendDurationString(durationString, stats->m_lastDurationOpen, false, false);
         m_pLCD->edit(0, 15, durationString);
       }
       break;
@@ -228,17 +229,64 @@ void SyrupDisplayManager::update(Stats *stats)
       if (m_displayState == AVERAGE_DUR) {
         char durationString[7];
         *durationString = LCDController::NULL_TERMINATOR;
-        appendDurationString(durationString, m_pStats->m_averageDurationOpen, false, false);
-        m_pLCD->edit(0, 14, durationString);
+        appendDurationString(durationString, stats->m_averageDurationOpen, false, false);
+        m_pLCD->edit(0, 1, durationString);
       }
       break;
     case Stats::AVERAGE_DURATION_CLOSED:
       if (m_displayState == AVERAGE_DUR) {
         char durationString[7];
         *durationString = LCDController::NULL_TERMINATOR;
-        appendDurationString(durationString, m_pStats->m_averageDurationClosed, false, false);
+        appendDurationString(durationString, stats->m_averageDurationClosed, false, false);
         m_pLCD->edit(1, 16, durationString);
-      
+      }
+      break;
+    case Stats::COUNT_OPEN:
+      if (m_displayState == COUNT) {
+        char countStr[6];
+        itoa(stats->m_countOpen, countStr, 10);
+        appendSpaces(countStr, 5, countStr);
+        m_pLCD->edit(0, 12, countStr);
+      }
+      break;
+    case Stats::COUNT_CLOSED:
+      if (m_displayState == COUNT) {
+        char countStr[6];
+        itoa(stats->m_countClosed, countStr, 10);
+        appendSpaces(countStr, 5, countStr);
+        m_pLCD->edit(1, 14, countStr);
+      }
+      break;
+    case Stats::UPTIME:
+      if (m_displayState == SYS_INFO) {
+        char uptimeStr[8];
+        *uptimeStr = LCDController::NULL_TERMINATOR;
+        appendDurationString(uptimeStr, stats->m_uptime, false, false, true);
+        m_pLCD->edit(0, 8, uptimeStr);
+      }
+      break;
+    case Stats::FREE_MEM:
+      if (m_displayState == SYS_INFO) {
+        char memStr[5];
+        itoa(stats->m_freeMem, memStr, 10);
+        appendSpaces(memStr, 5, memStr);
+        m_pLCD->edit(1, 10, memStr);
+      }
+      break;
+    case Stats::TEMP_MIN:
+      if (m_displayState == TEMP_MAX_MIN) {
+        char tempStr[8];
+        *tempStr = LCDController::NULL_TERMINATOR;
+        appendTempStringMaxMin(tempStr, stats->m_tempMin);
+        m_pLCD->edit(1, 15, tempStr);
+      }
+      break;
+    case Stats::TEMP_MAX:
+      if (m_displayState == TEMP_MAX_MIN) {
+        char tempStr[8];
+        *tempStr = LCDController::NULL_TERMINATOR;
+        appendTempStringMaxMin(tempStr, stats->m_tempMax);
+        m_pLCD->edit(0, 15, tempStr);      
       }
       break;
     case Stats::RESET:
@@ -276,6 +324,9 @@ void SyrupDisplayManager::update(ToggleButton *toggleButton)
         setState(CANCELED);
         setState(THRES);
       }
+    }
+    else {
+      m_toggleButtonPressCount = 0;
     }
   }
   else {
@@ -329,16 +380,18 @@ void SyrupDisplayManager::tick()
       {
         case THRES:
           if (m_pTHRESEditor && m_pTHRESEditor->isInEditMode()) {
-            m_pTHRESEditor->save();
-            cancelThresEditMode();
-            setState(SAVED);
-            setState(THRES);
+            if (m_pTHRESEditor->save()) {
+              setState(SAVED);
+              setState(THRES);
+              cancelThresEditMode();
+            }
           }
           else {
             m_pTHRESEditor = new THRESEditor(m_pSettingsManager, m_pEncoder, m_pToggleButton);
             m_pTHRESEditor->attach(this);
             m_pTHRESEditor->enterEditMode();
             m_editModeBlinkTime = (long)millis();
+            m_toggleButtonPressCount = 0;
           }        
           break;
         case LAST_DUR:
@@ -412,6 +465,15 @@ void SyrupDisplayManager::draw()
     case AVERAGE_DUR:
       drawDuration(true);
       break;
+    case COUNT:
+      drawCount();
+      break;
+    case TEMP_MAX_MIN:
+      drawMaxMin();
+      break;
+    case SYS_INFO:
+      drawSysInfo();
+      break;
     default:
       m_pLCD->clear();
       m_pLCD->write(1, s_welcomeLineOne);      
@@ -419,6 +481,71 @@ void SyrupDisplayManager::draw()
   }
 }
 
+void SyrupDisplayManager::drawMaxMin()
+{
+  char tempStr[24];
+  strcpy(tempStr, s_seenMax);
+  strcat(tempStr, s_space);
+  strcat(tempStr, s_tempCaps);
+  strcat(tempStr, s_space);
+  strcat(tempStr, s_seenObserved);
+  strcat(tempStr, s_colon);
+  strcat(tempStr, s_space);
+  appendTempStringMaxMin(tempStr, m_pStats->m_tempMax);
+  m_pLCD->write(0, tempStr);
+  
+  strcpy(tempStr, s_seenMin);
+  strcat(tempStr, s_space);
+  strcat(tempStr, s_tempCaps);
+  strcat(tempStr, s_space);
+  strcat(tempStr, s_seenObserved);
+  strcat(tempStr, s_colon);
+  strcat(tempStr, s_space);
+  appendTempStringMaxMin(tempStr, m_pStats->m_tempMin);
+  m_pLCD->write(1, tempStr);  
+}
+
+void SyrupDisplayManager::drawSysInfo()
+{
+  char infoStr[16];
+  char infoIntStr[5];
+  strcpy(infoStr, s_systemUptime);
+  strcat(infoStr, s_colon);
+  strcat(infoStr, s_space);
+  appendDurationString(infoStr, m_pStats->m_uptime, false, false, true);
+  m_pLCD->write(0, infoStr);
+  
+  strcpy(infoStr, s_systemFreeMem);
+  strcat(infoStr, s_colon);
+  strcat(infoStr, s_space);
+  itoa(m_pStats->m_freeMem, infoIntStr, 10);
+  strcat(infoStr, infoIntStr);
+  m_pLCD->write(1, infoStr);
+  
+}
+
+void SyrupDisplayManager::drawCount()
+{
+  char countStr[15];
+  char countIntStr[6];
+  strcpy(countStr, s_count);
+  strcat(countStr, s_space);
+  strcat(countStr, s_valveStateOpen);
+  strcat(countStr, s_colon);
+  strcat(countStr, s_space);
+  itoa(m_pStats->m_countOpen, countIntStr, 10);
+  strcat(countStr, countIntStr);
+  m_pLCD->write(0, countStr);
+  
+  strcpy(countStr, s_count);
+  strcat(countStr, s_space);
+  strcat(countStr, s_valveStateClosed);
+  strcat(countStr, s_colon);
+  strcat(countStr, s_space);
+  itoa(m_pStats->m_countClosed, countIntStr, 10);
+  strcat(countStr, countIntStr);
+  m_pLCD->write(1, countStr);  
+}
 
 void SyrupDisplayManager::drawDuration(bool useAverage)
 {
@@ -597,9 +724,29 @@ void SyrupDisplayManager::appendTempString(char *string, float temp)
   appendSpaces(string, charLength, tempStr);
 }
 
+void SyrupDisplayManager::appendTempStringMaxMin(char *string, int tempDigital)
+{
+  char tempStr[8];
+  float tempVal;
+  switch(m_pSettingsManager->m_settings.m_tempScale)
+  {
+    case TempProbe::FAHRENHEIT:
+      tempVal = m_pTempProbe->convertReadingToF(tempDigital);
+      dtostrf(tempVal, 4, 2, tempStr);
+      strcat(tempStr, s_tempDegreeF);
+      break;
+    case TempProbe::CELCIUS:
+      tempVal = m_pTempProbe->convertReadingToC(tempDigital);
+      dtostrf(tempVal, 4, 2, tempStr);
+      strcat(tempStr, s_tempDegreeC);
+      break;
+  }
+  strcat(string, tempStr);
+  appendSpaces(string, 7, tempStr);
+}
+
 void SyrupDisplayManager::appendTempStringMain(char *string)
 {
-  int charLength = 7;
   char tempStr[8];
   if (m_pTempProbe->m_tempProbeReading != 0) {
     switch(m_pSettingsManager->m_settings.m_tempScale)
@@ -618,7 +765,7 @@ void SyrupDisplayManager::appendTempStringMain(char *string)
     strcpy(tempStr, s_calculating);
   }
   strcat(string, tempStr);
-  appendSpaces(string, charLength, tempStr);
+  appendSpaces(string, 7, tempStr);
 }
 
 void SyrupDisplayManager::appendTempScaleSymbol(char* string, TempProbe::e_scale scale)
@@ -653,10 +800,12 @@ void SyrupDisplayManager::appendValveStateString(char* string)
 void SyrupDisplayManager::appendDurationString(char* string, unsigned long time,
   bool rightOriented, bool animate)
 {
+  appendDurationString(string, time, rightOriented, animate, false);
+}
+void SyrupDisplayManager::appendDurationString(char* string, unsigned long time,
+  bool rightOriented, bool animate, bool isMinutes)
+{
   int charLength = 7;
-  long dayTime = 86400;
-  int hourTime = 3600;
-  int minuteTime = 60;
   int integerBase = 10;
   char durationStr[charLength+1];
   *durationStr = LCDController::NULL_TERMINATOR;
@@ -667,6 +816,22 @@ void SyrupDisplayManager::appendDurationString(char* string, unsigned long time,
   bool ignoreSeconds = false;
   bool ignoreMinutes = false;
   char timePart[5];
+  
+  long dayTime;
+  int hourTime;
+  int minuteTime;
+  if (!isMinutes) {
+    dayTime = 86400;
+    hourTime = 3600;
+    minuteTime = 60;
+  }
+  else {
+    dayTime = 1440;
+    hourTime = 60;
+    minuteTime = 1;
+    ignoreSeconds = true;
+  }
+  
   while (time >= dayTime) {
     time -= dayTime;
     days++;
@@ -713,13 +878,13 @@ void SyrupDisplayManager::appendDurationString(char* string, unsigned long time,
       }
       ignoreSeconds = true;
     }
-    if (!ignoreMinutes && (minutes > 0 || hours > 0)) {
-      if (minutes < 10 && ignoreSeconds) {
+    if (!ignoreMinutes && (minutes > 0 || hours > 0 || isMinutes)) {
+      if (minutes < 10 && ignoreSeconds && !isMinutes) {
         strcat(durationStr, s_zeroChar);
       }
       itoa(minutes, timePart, integerBase);
       strcat(durationStr, timePart);
-      if (!ignoreSeconds) {
+      if (!ignoreSeconds || isMinutes) {
         strcat(durationStr, s_minutesChar);
         strcat(durationStr, s_space);
       }

@@ -17,8 +17,8 @@ TempProbe::TempProbe(int tempProbePin)
   m_delayTime = 0;
   #ifdef DEBUG_SWEEP_TEMP
     db_sweepDirection = false;
-    db_sweepMax = 255;
-    db_sweepMin = 110;
+    db_sweepMax = 160;
+    db_sweepMin = 130;
     db_currentTemp = 140;
   #endif
 }

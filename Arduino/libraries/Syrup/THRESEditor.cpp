@@ -44,12 +44,16 @@ bool THRESEditor::isInEditMode()
   return m_inEditMode;
 }
 
-void THRESEditor::save()
+bool THRESEditor::save()
 {
-  m_pSettingsManager->m_settings.m_upperThreshold = m_upperThreshold;
-  m_pSettingsManager->m_settings.m_lowerThreshold = m_lowerThreshold;
-  m_pSettingsManager->m_settings.m_tempScale = m_tempScale;
-  m_pSettingsManager->save();
+  if (m_upperThreshold > m_lowerThreshold) {
+    m_pSettingsManager->m_settings.m_upperThreshold = m_upperThreshold;
+    m_pSettingsManager->m_settings.m_lowerThreshold = m_lowerThreshold;
+    m_pSettingsManager->m_settings.m_tempScale = m_tempScale;
+    m_pSettingsManager->save();
+    return true;
+  }
+  return false;
 }
 
 void THRESEditor::setEditMode(bool editMode)

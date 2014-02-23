@@ -130,8 +130,10 @@ void TempValveManager::doUpperBoundsTask()
   #ifdef DEBUG_BOUNDS
     Serial.println(F("TVM: UPPER BOUNDS"));
   #endif
-  m_pValveController->openValve();
-  m_taskRun = UPPER_TASK;
+  if (m_pValveController->m_valveState == ValveController::CLOSED) {
+    m_pValveController->openValve();
+    m_taskRun = UPPER_TASK;
+  }
 }
 
 void TempValveManager::doLowerBoundsTask()
@@ -139,7 +141,9 @@ void TempValveManager::doLowerBoundsTask()
   #ifdef DEBUG_BOUNDS
     Serial.println(F("TVM: LOWER BOUNDS"));
   #endif
-  m_pValveController->closeValve();
-  m_taskRun = LOWER_TASK;
+  if (m_pValveController->m_valveState == ValveController::OPEN) {
+    m_pValveController->closeValve();
+    m_taskRun = LOWER_TASK;
+  }
 }
 

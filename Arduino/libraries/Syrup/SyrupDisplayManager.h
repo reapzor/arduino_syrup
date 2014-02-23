@@ -31,15 +31,12 @@ class SyrupDisplayManager : public Observer<TempProbe>, public Observer<ValveCon
       LAST_DUR,
       AVERAGE_DUR,
       COUNT,
+      TEMP_MAX_MIN,
       SYS_INFO,
-      LCD_INFO,
       VALVE_OVERRIDE,
       SAVED,
       CANCELED,
-      THRES_EDIT,
-      LCD_EDIT,
       WELCOME,
-      OFF,
       UNDEF
     };
     
@@ -78,6 +75,7 @@ class SyrupDisplayManager : public Observer<TempProbe>, public Observer<ValveCon
 
     static char* s_count;
     
+    static char* s_tempCaps;
     static char* s_valveCaps;
     static char* s_overrideValveOverride;
     
@@ -119,8 +117,11 @@ class SyrupDisplayManager : public Observer<TempProbe>, public Observer<ValveCon
     bool m_prepForTransition;
     void appendDurationString(char* string, unsigned long time, 
         bool rightOriented, bool animate);
+    void appendDurationString(char* string, unsigned long time,
+        bool rightOriented, bool animate, bool isMinutes);
     void appendTempString(char* string, float temp);
     void appendTempStringMain(char* string);
+    void appendTempStringMaxMin(char * string, int tempDigital);
     void appendValveStateString(char* string);
     void appendTempScaleSymbol(char* string, TempProbe::e_scale scale);
     void appendSpaces(char* string, int length, char* baseString);
@@ -137,7 +138,7 @@ class SyrupDisplayManager : public Observer<TempProbe>, public Observer<ValveCon
     TempValveManager *m_pTempValveManager;
     
     static const int TOGGLE_BUTTON_COUNT_DURATION = 2000;
-    static const int TOGGLE_BUTTON_COUNT = 3;
+    static const int TOGGLE_BUTTON_COUNT = 4;
     static const int TOGGLE_BUTTON_ON_DURATION = 3000;
     static const int WELCOME_TRANSITION_DELAY = 2000;
     static const int SETTING_SAVED_TRANSITION_DELAY = 3000;
@@ -156,6 +157,9 @@ class SyrupDisplayManager : public Observer<TempProbe>, public Observer<ValveCon
     void drawSettingSaved();
     void drawSettingCanceled();
     void drawDuration(bool useAverage);
+    void drawCount();
+    void drawMaxMin();
+    void drawSysInfo();
     
     void cancelThresEditMode();
     void editModeBlinkDraw(int row, int offset);

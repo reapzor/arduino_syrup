@@ -41,7 +41,7 @@ class THRESEditor : public Subject<THRESEditor>, public Observer<Encoder>,
     
     void enterEditMode();
     void leaveEditMode();
-    void save();
+    bool save();
     
     void update(Encoder *encoder);
     void update(ToggleButton *toggleButton);
