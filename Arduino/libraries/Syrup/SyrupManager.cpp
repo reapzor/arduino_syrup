@@ -725,43 +725,35 @@ void SyrupManager::editModeBlinkDraw(int row, int offset)
 */
 void SyrupManager::appendThresholdString(char *string)
 {
-  char thresStr[9];
   switch (m_pTempValveManager->m_thresholdRegion)
   {
     case TempValveManager::OVER:
-      strcpy(thresStr, s_over);
-      appendSpaces(string, 8, thresStr);
-      strcat(string, thresStr);
+      appendSpaces(string, 8, s_over);
+      strcat(string, s_over);
       break;
     case TempValveManager::UPPER:
-      strcpy(thresStr, s_upper);
-      appendSpaces(string, 8, thresStr);
-      strcat(string, thresStr);
+      appendSpaces(string, 8, s_upper);
+      strcat(string, s_upper);
       break;
     case TempValveManager::MEDIAN_ASCENDING:
-      strcpy(thresStr, s_raising);
-      appendSpaces(string, 8, thresStr);
-      strcat(string, thresStr);
+      appendSpaces(string, 8, s_raising);
+      strcat(string, s_raising);
       break;
     case TempValveManager::MEDIAN_DESCENDING:
-      strcpy(thresStr, s_dropping);
-      appendSpaces(string, 8, thresStr);
-      strcat(string, thresStr);
+      appendSpaces(string, 8, s_dropping);
+      strcat(string, s_dropping);
       break;
     case TempValveManager::LOWER:
-      strcpy(thresStr, s_lower);
-      appendSpaces(string, 8, thresStr);
-      strcat(string, thresStr);
+      appendSpaces(string, 8, s_lower);
+      strcat(string, s_lower);
       break;
     case TempValveManager::BELOW:
-      strcpy(thresStr, s_under);
-      appendSpaces(string, 8, thresStr);
-      strcat(string, thresStr);
+      appendSpaces(string, 8, s_under);
+      strcat(string, s_under);
       break;
     case TempValveManager::UNDEF:
-      strcpy(thresStr, s_calculating);
-      appendSpaces(string, 8, thresStr);
-      strcat(string, thresStr);
+      appendSpaces(string, 8, s_calculating);
+      strcat(string, s_calculating);
       break;
       
   }
@@ -963,8 +955,7 @@ void SyrupManager::appendDurationString(char* string, unsigned long time,
 
 void SyrupManager::appendSpaces(char* string, int length, char* baseString)
 {
-  int spacesNeeded = length-strlen(baseString);
-  for (int x = 0; x < spacesNeeded; x++) {
+  for (int x = strlen(baseString); x < length; x++) {
     strcat(string, s_space);
   }
 }
