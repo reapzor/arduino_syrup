@@ -64,6 +64,13 @@ char* SyrupManager::s_average = "AVG";
 
 char* SyrupManager::s_count = "COUNT";
 
+char* SyrupManager::s_raising = "Raising";
+char* SyrupManager::s_dropping = "Dropping";
+char* SyrupManager::s_upper = "Upper";
+char* SyrupManager::s_lower = "Lower";
+char* SyrupManager::s_over = "OVER!";
+char* SyrupManager::s_under = "UNDER!";
+
 char* SyrupManager::s_tempCaps = "TEMP";
 char* SyrupManager::s_valveCaps = "VALVE";
 char* SyrupManager::s_overrideValveOverride = "OVERRIDE";
@@ -330,7 +337,12 @@ void SyrupManager::update(ToggleButton *toggleButton)
 //TEMP VALVE MANAGER
 void SyrupManager::update(TempValveManager *tempValveManager)
 {
-  //Serial.println(tempValveManager->m_thresholdRegion);
+  if (m_displayState == MAIN) {
+    char thresStr[9];
+    *thresStr = LCDController::NULL_TERMINATOR;
+    appendThresholdString(thresStr);
+    m_pLCD->edit(0, 16, thresStr);
+  }
 }
 
 //OVERRIDE MANAGER
@@ -368,7 +380,7 @@ void SyrupManager::tick()
       switch (m_displayState)
       {
         case THRES:
-          if (m_pTHRESEditor && m_pTHRESEditor->isInEditMode()) {
+          if (m_pTHRESEditor) {
             if (m_pTHRESEditor->save()) {
               setState(SAVED);
               setState(THRES);
@@ -672,7 +684,10 @@ void SyrupManager::drawMain()
   strcat(row, s_space);
   appendTempStringMain(row);
   m_pLCD->write(0, row);
-  m_pLCD->edit(0, 19, s_mainTime);
+  
+  *row = LCDController::NULL_TERMINATOR;
+  appendThresholdString(row);
+  m_pLCD->edit(0, 16, row);
   
   strcpy(row, s_mainValve);
   strcat(row, s_colon);
@@ -709,6 +724,50 @@ void SyrupManager::editModeBlinkDraw(int row, int offset)
 ### APPENDING ###
 #################
 */
+void SyrupManager::appendThresholdString(char *string)
+{
+  char thresStr[9];
+  switch (m_pTempValveManager->m_thresholdRegion)
+  {
+    case TempValveManager::OVER:
+      strcpy(thresStr, s_over);
+      appendSpaces(string, 8, thresStr);
+      strcat(string, thresStr);
+      break;
+    case TempValveManager::UPPER:
+      strcpy(thresStr, s_upper);
+      appendSpaces(string, 8, thresStr);
+      strcat(string, thresStr);
+      break;
+    case TempValveManager::MEDIAN_ASCENDING:
+      strcpy(thresStr, s_raising);
+      appendSpaces(string, 8, thresStr);
+      strcat(string, thresStr);
+      break;
+    case TempValveManager::MEDIAN_DESCENDING:
+      strcpy(thresStr, s_dropping);
+      appendSpaces(string, 8, thresStr);
+      strcat(string, thresStr);
+      break;
+    case TempValveManager::LOWER:
+      strcpy(thresStr, s_lower);
+      appendSpaces(string, 8, thresStr);
+      strcat(string, thresStr);
+      break;
+    case TempValveManager::BELOW:
+      strcpy(thresStr, s_under);
+      appendSpaces(string, 8, thresStr);
+      strcat(string, thresStr);
+      break;
+    case TempValveManager::UNDEF:
+      strcpy(thresStr, s_calculating);
+      appendSpaces(string, 8, thresStr);
+      strcat(string, thresStr);
+      break;
+      
+  }
+}
+
 void SyrupManager::appendTempString(char *string, float temp)
 {
   int charLength = 6;

@@ -74,6 +74,13 @@ class SyrupManager : public Observer<TempProbe>, public Observer<ValveController
 
     static char* s_count;
     
+    static char* s_raising;
+    static char* s_dropping;
+    static char* s_upper;
+    static char* s_lower;
+    static char* s_over;
+    static char* s_under;
+    
     static char* s_tempCaps;
     static char* s_valveCaps;
     static char* s_overrideValveOverride;
@@ -124,6 +131,7 @@ class SyrupManager : public Observer<TempProbe>, public Observer<ValveController
     void appendValveStateString(char* string);
     void appendTempScaleSymbol(char* string, TempProbe::e_scale scale);
     void appendSpaces(char* string, int length, char* baseString);
+    void appendThresholdString(char* string);
     
     LCDController *m_pLCD;
     TempProbe *m_pTempProbe;
