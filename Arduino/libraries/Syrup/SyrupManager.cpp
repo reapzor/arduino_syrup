@@ -991,6 +991,7 @@ void SyrupManager::cancelThresEditMode()
     m_pTHRESEditor->detach(this);
     delete(m_pTHRESEditor);
     m_pTHRESEditor = NULL;
+    m_editModeBlinkOn = false;
   }
 }
 
