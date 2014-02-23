@@ -35,7 +35,6 @@ char* SyrupManager::s_welcomeLineTwo = "CREATED BY CHUCK BENSON";
 
 char* SyrupManager::s_mainTemp = "Temp";
 char* SyrupManager::s_mainValve = "Valve";
-char* SyrupManager::s_mainTime = "Time";
 
 char* SyrupManager::s_calculating = "CALC...";
 

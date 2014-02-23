@@ -45,7 +45,6 @@ class SyrupManager : public Observer<TempProbe>, public Observer<ValveController
     
     static char* s_mainTemp;
     static char* s_mainValve;
-    static char* s_mainTime;
     
     static char* s_calculating;
     
