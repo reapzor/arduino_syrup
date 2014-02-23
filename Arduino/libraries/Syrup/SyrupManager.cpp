@@ -38,7 +38,6 @@ char* SyrupManager::s_mainValve = "Valve";
 char* SyrupManager::s_mainTime = "Time";
 
 char* SyrupManager::s_calculating = "CALC...";
-char* SyrupManager::s_period = ".";
 
 char* SyrupManager::s_tempDegreeF = "F";
 char* SyrupManager::s_tempDegreeC = "C";
@@ -289,17 +288,6 @@ void SyrupManager::update(Stats *stats)
         m_pLCD->edit(0, 15, tempStr);      
       }
       break;
-    case Stats::RESET:
-      switch (m_displayState)
-      {
-        case LAST_DUR:
-        case AVERAGE_DUR:
-        case COUNT:
-        case TEMP_MAX_MIN:
-          shouldDraw();
-          break;
-      }
-      break;
   }
 }
 
@@ -398,7 +386,9 @@ void SyrupManager::tick()
         case LAST_DUR:
         case AVERAGE_DUR:
         case COUNT:
+        case TEMP_MAX_MIN:
           m_pStats->reset();
+          shouldDraw();
           break;
       }
     }
@@ -835,7 +825,6 @@ void SyrupManager::appendDurationString(char* string, unsigned long time,
     minuteTime = 1;
     ignoreSeconds = true;
   }
-  
   while (time >= dayTime) {
     time -= dayTime;
     days++;
@@ -957,8 +946,5 @@ void SyrupManager::cancelThresEditMode()
     delete(m_pTHRESEditor);
     m_pTHRESEditor = NULL;
   }
- // if (m_editModeBlinkOn) {
-    //editModeBlinkDraw(m_editModeBlinkRow, m_editModeBlinkOffset);
-  //}
 }
 
