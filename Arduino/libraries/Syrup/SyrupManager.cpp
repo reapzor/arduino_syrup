@@ -274,7 +274,7 @@ void SyrupManager::update(Stats *stats)
       if (m_displayState == SYS_INFO) {
         char memStr[5];
         itoa(stats->m_freeMem, memStr, 10);
-        appendSpaces(memStr, 5, memStr);
+        appendSpaces(memStr, 4, memStr);
         m_pLCD->edit(1, 10, memStr);
       }
       break;

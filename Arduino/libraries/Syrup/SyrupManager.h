@@ -146,7 +146,7 @@ class SyrupManager : public Observer<TempProbe>, public Observer<ValveController
     static const int TOGGLE_BUTTON_COUNT_DURATION = 2000;
     static const int TOGGLE_BUTTON_COUNT = 4;
     static const int TOGGLE_BUTTON_ON_DURATION = 3000;
-    static const int WELCOME_TRANSITION_DELAY = 2000;
+    static const int WELCOME_TRANSITION_DELAY = 5000;
     static const int SETTING_SAVED_TRANSITION_DELAY = 3000;
     static const int DELAY_BETWEEN_POSSIBLE_SHOULD_DRAWS = 300;
     static const int EDIT_MODE_BLINK_TIME = 500;
