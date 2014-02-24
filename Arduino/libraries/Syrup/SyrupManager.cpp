@@ -63,7 +63,7 @@ char* SyrupManager::s_average = "AVG";
 
 char* SyrupManager::s_count = "COUNT";
 
-char* SyrupManager::s_raising = "Raising";
+char* SyrupManager::s_raising = "Rising";
 char* SyrupManager::s_dropping = "Dropping";
 char* SyrupManager::s_upper = "Upper";
 char* SyrupManager::s_lower = "Lower";
