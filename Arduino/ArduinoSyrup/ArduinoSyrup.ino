@@ -53,7 +53,7 @@
      
      
  void setup() { 
-    Serial.begin (57600);
+    //Serial.begin (57600);
     
     settingsManager.prime();
     encoder.prime();
