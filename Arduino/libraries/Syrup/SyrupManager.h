@@ -17,7 +17,7 @@
 #include "TempValveManager.h"
 
 //#define DEBUG_OBSERVERS
-#define DEBUG
+//#define DEBUG
 
 class SyrupManager : public Observer<TempProbe>, public Observer<ValveController>,
   public Observer<Stats>, public Observer<ToggleButton>, public Observer<OverrideManager>, 

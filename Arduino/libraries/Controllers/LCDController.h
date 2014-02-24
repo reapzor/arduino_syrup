@@ -4,7 +4,7 @@
 
 #include <Arduino.h>
 #include <LiquidCrystal.h>
-#define DEV
+//#define DEV
 //#define DEBUG
 
 /*

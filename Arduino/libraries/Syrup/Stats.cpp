@@ -57,10 +57,7 @@ void Stats::update(TempValveManager *tempValveManager)
       m_currentDuration = 0;
       resetNextSecond();
       sendNotify(CURRENT_DURATION);
-      if (m_countClosed == 0) {
-        m_averageDurationClosed = 0;
-      }
-      else {
+      if (m_countClosed != 0) {
         m_averageDurationClosed = ((m_averageDurationClosed * (m_countClosed-1))
           + m_lastDurationClosed) / m_countClosed;
         sendNotify(AVERAGE_DURATION_CLOSED);
@@ -78,10 +75,7 @@ void Stats::update(TempValveManager *tempValveManager)
       m_currentDuration = 0;
       resetNextSecond();
       sendNotify(CURRENT_DURATION);
-      if (m_countOpen == 0) {
-        m_averageDurationOpen = 0;
-      }
-      else {
+      if (m_countOpen != 0) {
         m_averageDurationOpen = ((m_averageDurationOpen * (m_countOpen-1))
           + m_lastDurationOpen) / m_countOpen;
         sendNotify(AVERAGE_DURATION_OPEN);
